@@ -1,0 +1,5 @@
+{
+  "name": "QuestAI Paper Extractor",
+  "description": "A high-performance tool to extract MCQ questions from multi-page PDFs using Gemini's vision capabilities. Supports Hindi/English mixed text, diagram detection, and structured JSON export.",
+  "requestFramePermissions": []
+}
