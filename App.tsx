@@ -7,11 +7,11 @@ import QuestionCard from './components/QuestionCard';
 import Navbar from './components/Navbar';
 import { convertPdfToImages, cropDiagram } from './services/pdfService';
 import { extractQuestionsFromPage, performOCR } from './services/geminiService';
-import { 
-  RefreshCcw, 
-  FileJson, 
-  FileText, 
-  FileOutput, 
+import {
+  RefreshCcw,
+  FileJson,
+  FileText,
+  FileOutput,
   ChevronDown,
   FileCode,
   Key,
@@ -39,7 +39,17 @@ const App: React.FC = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [fileName, setFileName] = useState('');
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showKeyDialog, setShowKeyDialog] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
   const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Check for API key on mount
+    const key = localStorage.getItem('gemini_api_key') || import.meta.env.VITE_API_KEY;
+    if (!key) {
+      setShowKeyDialog(true);
+    }
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -52,7 +62,22 @@ const App: React.FC = () => {
   }, []);
 
   const handleOpenKeyDialog = async () => {
-    if (window.aistudio) await window.aistudio.openSelectKey();
+    if (window.aistudio) {
+      await window.aistudio.openSelectKey();
+    } else {
+      const currentKey = localStorage.getItem('gemini_api_key') || '';
+      setApiKeyInput(currentKey);
+      setShowKeyDialog(true);
+    }
+  };
+
+  const saveApiKey = () => {
+    if (apiKeyInput.trim()) {
+      localStorage.setItem('gemini_api_key', apiKeyInput.trim());
+      setShowKeyDialog(false);
+      setMessage('API Key saved successfully.');
+      setTimeout(() => setMessage(''), 3000);
+    }
   };
 
   const handleProcess = async (file: File) => {
@@ -68,60 +93,56 @@ const App: React.FC = () => {
       setMessage('Processing page layers...');
       setProgress(15);
 
-      const allExtractedQuestions: Question[] = [];
-      const CONCURRENCY_LIMIT = 2; 
       setStep(ProcessStep.EXTRACTING_DATA);
+      setMessage(`Extracting content from ${pages.length} pages in parallel...`);
 
-      for (let i = 0; i < pages.length; i += CONCURRENCY_LIMIT) {
-        const batch = pages.slice(i, i + CONCURRENCY_LIMIT);
-        setMessage(`Extracting content from pages ${i + 1}-${Math.min(i + CONCURRENCY_LIMIT, pages.length)}...`);
-        
-        const batchResults = await Promise.all(
-          batch.map(async (page) => {
-            try {
-              const pageQuestions = await extractQuestionsFromPage(page.image, page.pageNumber);
-              
-              await Promise.all(pageQuestions.map(async (q) => {
-                const cropAndOcrPromises = [];
-                if (q.has_diagram && q.diagram_bbox) {
-                  cropAndOcrPromises.push(
-                    cropDiagram(page.image, q.diagram_bbox, page.width, page.height).then(async url => {
-                      if (url) {
-                        q.diagram_url = url;
-                        q.diagram_alt_text = await performOCR(url);
-                      }
-                    })
-                  );
-                }
-                const labels = ['A', 'B', 'C', 'D'] as const;
-                labels.forEach(label => {
-                  const bboxKey = `${label}_diagram_bbox` as keyof typeof q.options;
-                  const bbox = q.options[bboxKey] as [number, number, number, number] | undefined;
-                  if (bbox && bbox.length === 4) {
-                    cropAndOcrPromises.push(
-                      cropDiagram(page.image, bbox, page.width, page.height).then(async url => {
-                        if (url) {
-                          (q.options as any)[`${label}_diagram_url`] = url;
-                          (q.options as any)[`${label}_diagram_alt_text`] = await performOCR(url);
-                        }
-                      })
-                    );
+      const allExtractedQuestions: Question[] = [];
+
+      const pagePromises = pages.map(async (page) => {
+        try {
+          const pageQuestions = await extractQuestionsFromPage(page.image, page.pageNumber);
+
+          await Promise.all(pageQuestions.map(async (q) => {
+            const cropAndOcrPromises = [];
+            if (q.has_diagram && q.diagram_bbox) {
+              cropAndOcrPromises.push(
+                cropDiagram(page.image, q.diagram_bbox, page.width, page.height).then(async url => {
+                  if (url) {
+                    q.diagram_url = url;
+                    q.diagram_alt_text = await performOCR(url);
                   }
-                });
-                await Promise.all(cropAndOcrPromises);
-              }));
-              return pageQuestions;
-            } catch (error: any) {
-              console.error(error);
-              return [];
+                })
+              );
             }
-          })
-        );
-        allExtractedQuestions.push(...batchResults.flat());
-        setProgress(15 + ((i + batch.length) / pages.length) * 85);
-      }
+            const labels = ['A', 'B', 'C', 'D'] as const;
+            labels.forEach(label => {
+              const bboxKey = `${label}_diagram_bbox` as keyof typeof q.options;
+              const bbox = q.options[bboxKey] as [number, number, number, number] | undefined;
+              if (bbox && bbox.length === 4) {
+                cropAndOcrPromises.push(
+                  cropDiagram(page.image, bbox, page.width, page.height).then(async url => {
+                    if (url) {
+                      (q.options as any)[`${label}_diagram_url`] = url;
+                      (q.options as any)[`${label}_diagram_alt_text`] = await performOCR(url);
+                    }
+                  })
+                );
+              }
+            });
+            await Promise.all(cropAndOcrPromises);
+          }));
 
-      setQuestions(allExtractedQuestions.sort((a, b) => a.question_number - b.question_number));
+          allExtractedQuestions.push(...pageQuestions);
+          // Simple progress update (not perfect for parallel but gives feedback)
+          setProgress(prev => Math.min(95, prev + (85 / pages.length)));
+        } catch (error: any) {
+          console.error(`Error processing page ${page.pageNumber}:`, error);
+        }
+      });
+
+      await Promise.all(pagePromises);
+
+      setQuestions(allExtractedQuestions.sort((a, b) => (a.page_number - b.page_number) || (a.question_number - b.question_number)));
       setStep(ProcessStep.COMPLETED);
       setMessage(`Extracted ${allExtractedQuestions.length} questions.`);
       setProgress(100);
@@ -138,10 +159,10 @@ const App: React.FC = () => {
    * Includes essential KaTeX styles for correct math display.
    */
   const renderBlockToImage = async (
-    text: string, 
-    width: number, 
-    fontSize: number, 
-    isBold: boolean = false, 
+    text: string,
+    width: number,
+    fontSize: number,
+    isBold: boolean = false,
     color: string = '#1A1A1A'
   ): Promise<{ data: string; height: number }> => {
     return new Promise((resolve) => {
@@ -187,15 +208,15 @@ const App: React.FC = () => {
       setTimeout(async () => {
         const rect = container.getBoundingClientRect();
         const canvas = document.createElement('canvas');
-        const scale = 3; 
+        const scale = 3;
         canvas.width = rect.width * scale;
         canvas.height = rect.height * scale;
-        
+
         const ctx = canvas.getContext('2d');
         if (!ctx) { resolve({ data: '', height: 0 }); return; }
-        
+
         ctx.scale(scale, scale);
-        
+
         const data = `
           <svg xmlns="http://www.w3.org/2000/svg" width="${rect.width}" height="${rect.height}">
             <defs>
@@ -207,11 +228,11 @@ const App: React.FC = () => {
               </div>
             </foreignObject>
           </svg>`;
-        
+
         const img = new Image();
-        const svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
+        const svg = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
         const url = URL.createObjectURL(svg);
-        
+
         img.onload = () => {
           ctx.drawImage(img, 0, 0);
           const result = canvas.toDataURL('image/png', 1.0);
@@ -237,11 +258,11 @@ const App: React.FC = () => {
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     const contentWidthMM = pageWidth - (margin * 2);
-    const contentWidthPX = contentWidthMM * 3.78; 
+    const contentWidthPX = contentWidthMM * 3.78;
     let currentY = 25;
 
     const drawPageChrome = (pageNum: number) => {
-      doc.setFillColor(255, 107, 53); 
+      doc.setFillColor(255, 107, 53);
       doc.rect(0, 0, pageWidth, 4, 'F');
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
@@ -266,7 +287,7 @@ const App: React.FC = () => {
       const q = questions[i];
       const qText = `Q${q.question_number}. ${q.question_text}`;
       const questionBlock = await renderBlockToImage(qText, contentWidthPX, 14, true, '#1A1A1A');
-      
+
       // Page break check for question block
       if (currentY + (questionBlock.height / 3.78) + 15 > pageHeight - 20) {
         doc.addPage();
@@ -284,8 +305,8 @@ const App: React.FC = () => {
         try {
           const img = new Image();
           img.src = q.diagram_url;
-          await new Promise((resolve, reject) => { 
-            img.onload = resolve; 
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
             img.onerror = reject;
           });
           const aspect = img.height / img.width;
@@ -360,9 +381,14 @@ const App: React.FC = () => {
     setMessage('PDF Report generated successfully.');
   };
 
+  /* ... imports remain same ... */
+
   const handleExportWord = async () => {
     setShowExportMenu(false);
-    setMessage('Generating Word document...');
+    setMessage('Initializing Word export...');
+
+    // UI Yield
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     const children: any[] = [
       new Paragraph({
@@ -381,20 +407,65 @@ const App: React.FC = () => {
       new Paragraph({ text: "" }), // Spacer
     ];
 
+    const totalItems = questions.length;
+    let processed = 0;
+
     for (const q of questions) {
-      // Question Number and Text
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Q${q.question_number}. ${q.question_text}`,
-              bold: true,
-              size: 24, // 12pt
-            }),
-          ],
-          spacing: { before: 200, after: 100 },
-        })
-      );
+      processed++;
+      if (processed % 5 === 0) {
+        setMessage(`Exporting Question ${processed}/${totalItems}...`);
+        // Critical: Yield to UI thread to allow message update
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+
+      // Question Number and Text - Render as Image
+      const qText = `Q${q.question_number}. ${q.question_text}`;
+      try {
+        const qBlock = await renderBlockToImage(qText, 800, 24, true, '#1A1A1A');
+        if (qBlock.data) {
+          const base64Data = qBlock.data.split(',')[1];
+          children.push(
+            new Paragraph({
+              children: [
+                new ImageRun({
+                  data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)),
+                  transformation: { width: 450, height: qBlock.height / 2 },
+                  type: "png",
+                }),
+              ],
+              spacing: { before: 200, after: 100 },
+            })
+          );
+        } else {
+          // Fallback
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Q${q.question_number}. ${q.question_text}`,
+                  bold: true,
+                  size: 24,
+                }),
+              ],
+              spacing: { before: 200, after: 100 },
+            })
+          );
+        }
+      } catch (e) {
+        console.error("Failed to render Question Block", e);
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Q${q.question_number}. ${q.question_text}`,
+                bold: true,
+                size: 24,
+              }),
+            ],
+            spacing: { before: 200, after: 100 },
+          })
+        );
+      }
 
       // Main Diagram
       if (q.diagram_url) {
@@ -402,7 +473,7 @@ const App: React.FC = () => {
           const response = await fetch(q.diagram_url);
           const blob = await response.blob();
           const arrayBuffer = await blob.arrayBuffer();
-          
+
           children.push(
             new Paragraph({
               children: [
@@ -415,15 +486,15 @@ const App: React.FC = () => {
               alignment: AlignmentType.CENTER,
             })
           );
-          
+
           if (q.diagram_alt_text) {
-             children.push(
-                new Paragraph({
-                    text: `[Image Description: ${q.diagram_alt_text}]`,
-                    alignment: AlignmentType.CENTER,
-                    style: "IntenseQuote"
-                })
-             )
+            children.push(
+              new Paragraph({
+                text: `[Image Description: ${q.diagram_alt_text}]`,
+                alignment: AlignmentType.CENTER,
+                style: "IntenseQuote"
+              })
+            )
           }
 
         } catch (e) {
@@ -438,33 +509,58 @@ const App: React.FC = () => {
         const optDiagUrl = (q.options as any)[`${label}_diagram_url`];
         const optAltText = (q.options as any)[`${label}_diagram_alt_text`];
 
-        const optionParagraphChildren = [
-          new TextRun({
-            text: `(${label}) ${optText}`,
-            size: 22, // 11pt
-          }),
-        ];
+        const optionParagraphChildren = [];
+
+        // Render Option as Image too
+        try {
+          const optString = `(${label}) ${optText}`;
+          const optBlock = await renderBlockToImage(optString, 800, 22, false, '#374151');
+          if (optBlock.data) {
+            const base64Data = optBlock.data.split(',')[1];
+            optionParagraphChildren.push(
+              new ImageRun({
+                data: Uint8Array.from(atob(base64Data), c => c.charCodeAt(0)),
+                transformation: { width: 400, height: optBlock.height / 2 },
+                type: "png",
+              })
+            );
+          } else {
+            optionParagraphChildren.push(
+              new TextRun({
+                text: `(${label}) ${optText}`,
+                size: 22,
+              }),
+            );
+          }
+        } catch (e) {
+          optionParagraphChildren.push(
+            new TextRun({
+              text: `(${label}) ${optText}`,
+              size: 22,
+            }),
+          );
+        }
 
         if (optDiagUrl) {
-           try {
+          try {
             const response = await fetch(optDiagUrl);
             const blob = await response.blob();
             const arrayBuffer = await blob.arrayBuffer();
             optionParagraphChildren.push(new TextRun({ text: "\n" }));
             optionParagraphChildren.push(
-                new ImageRun({
-                  data: arrayBuffer,
-                  transformation: { width: 100, height: 100 },
-                  type: "png",
-                })
+              new ImageRun({
+                data: arrayBuffer,
+                transformation: { width: 100, height: 100 },
+                type: "png",
+              })
             );
-             if (optAltText) {
-                 optionParagraphChildren.push(new TextRun({ text: `\n[${optAltText}]`, italics: true, size: 16 }));
-             }
+            if (optAltText) {
+              optionParagraphChildren.push(new TextRun({ text: `\n[${optAltText}]`, italics: true, size: 16 }));
+            }
 
-           } catch(e) {
-               console.error("Failed to add option diagram", e);
-           }
+          } catch (e) {
+            console.error("Failed to add option diagram", e);
+          }
         }
 
         children.push(
@@ -475,12 +571,12 @@ const App: React.FC = () => {
           })
         );
       }
-      
-      children.push(new Paragraph({ text: "" })); // Spacer between questions
+
+      children.push(new Paragraph({ text: "" }));
       children.push(
-          new Paragraph({
-              border: { bottom: { color: "auto", space: 1, style: BorderStyle.SINGLE, size: 6 } }
-          })
+        new Paragraph({
+          border: { bottom: { color: "auto", space: 1, style: BorderStyle.SINGLE, size: 6 } }
+        })
       );
       children.push(new Paragraph({ text: "" }));
     }
@@ -501,12 +597,14 @@ const App: React.FC = () => {
     });
   };
 
+  /* ... rest of functions ... */
+
   const handleExportJSON = () => {
     const dataStr = JSON.stringify({ filename: fileName, total_questions: questions.length, questions }, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
-    const link = document.createElement('a'); 
-    link.href = URL.createObjectURL(blob); 
-    link.download = `QuestAI_Export_${Date.now()}.json`; 
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `QuestAI_Export_${Date.now()}.json`;
     link.click();
     setShowExportMenu(false);
   };
@@ -531,56 +629,127 @@ const App: React.FC = () => {
   const reset = () => { setStep(ProcessStep.IDLE); setQuestions([]); setProgress(0); setMessage(''); setFileName(''); };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-6">
         {step === ProcessStep.IDLE ? (
-          <div className="max-w-2xl mx-auto text-center mt-10 space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-peach/50 text-primary rounded-full border border-primary/10">
-              <ShieldCheck size={14} className="animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Advanced Vision extraction</span>
+          <div className="max-w-xl mx-auto text-center mt-12 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-peach/50 text-primary rounded-full border border-primary/10 hover:bg-peach/70 transition-colors cursor-default">
+              <ShieldCheck size={12} className="animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest leading-none pt-[1px]">Advanced Vision extraction</span>
             </div>
-            <div className="space-y-4">
-              <h1 className="text-5xl font-black text-dark font-display leading-tight">Quest<span className="text-primary">AI</span> Pro</h1>
-              <p className="text-slate-500 font-medium leading-relaxed max-w-lg mx-auto">Extract MCQs from complex test papers with pixel-perfect accuracy. Supports Hindi, Math, and Diagrams.</p>
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-5xl font-black text-dark font-display leading-tight tracking-tight">
+                Quest<span className="text-primary">AI</span> Pro
+              </h1>
+              <p className="text-slate-500 font-medium leading-relaxed max-w-md mx-auto text-sm sm:text-base">
+                Extract MCQs from complex test papers with pixel-perfect accuracy. Supports Hindi, Math, and Diagrams.
+              </p>
             </div>
-            <FileUpload onFileSelect={handleProcess} disabled={false} />
-            <button onClick={handleOpenKeyDialog} className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-primary flex items-center gap-2"><Key size={14} /> Configure Connection</button>
+            <div className="pt-4">
+              <FileUpload onFileSelect={handleProcess} disabled={false} />
+            </div>
+            <button onClick={handleOpenKeyDialog} className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-primary flex items-center justify-center gap-2 transition-colors mx-auto">
+              <Key size={12} /> Configure Connection
+            </button>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <ProcessStatus step={step} progress={progress} message={message} />
             {questions.length > 0 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4 bg-white p-6 rounded-3xl border border-slate-100 soft-shadow">
-                  <div>
-                    <h3 className="text-xl font-black text-dark">Extraction Summary</h3>
-                    <div className="px-3 py-1 bg-primary/5 text-primary text-[11px] font-black rounded-lg border border-primary/10 uppercase mt-2 inline-block">{questions.length} Items Extracted</div>
+                <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4 bg-white p-4 rounded-2xl border border-slate-100 soft-shadow sticky top-20 z-40 backdrop-blur-md bg-white/90">
+                  <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+                    <div>
+                      <h3 className="text-lg font-black text-dark leading-none">Extraction Summary</h3>
+                      <div className="px-2 py-0.5 bg-primary/5 text-primary text-[10px] font-black rounded-md border border-primary/10 uppercase mt-1 inline-block">
+                        {questions.length} Items Extracted
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex gap-3 relative" ref={exportMenuRef}>
-                    <button onClick={reset} className="px-5 py-3 text-[11px] font-black uppercase text-slate-500 bg-slate-50 border border-slate-100 rounded-2xl hover:bg-slate-100"><RefreshCcw size={14} /></button>
+
+                  <div className="flex gap-2 relative w-full md:w-auto justify-end" ref={exportMenuRef}>
+                    <button onClick={reset} className="p-3 text-[11px] font-black uppercase text-slate-500 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 hover:text-dark transition-all" title="Reset">
+                      <RefreshCcw size={16} />
+                    </button>
                     <div className="relative">
-                      <button onClick={() => setShowExportMenu(!showExportMenu)} className="flex items-center gap-2 px-6 py-3 text-[11px] font-black uppercase text-white bg-primary rounded-2xl hover:bg-secondary shadow-lg shadow-primary/20 transition-all">
-                        <Download size={14} /> Download Results <ChevronDown size={12} />
+                      <button
+                        onClick={() => setShowExportMenu(!showExportMenu)}
+                        className="flex items-center gap-2 px-5 py-3 text-[11px] font-black uppercase text-white bg-primary rounded-xl hover:bg-secondary shadow-lg shadow-primary/20 transition-all active:scale-95"
+                      >
+                        <Download size={16} /> <span className="hidden sm:inline">Download Results</span> <span className="sm:hidden">Export</span> <ChevronDown size={12} />
                       </button>
                       {showExportMenu && (
-                        <div className="absolute right-0 mt-3 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                          <button onClick={handleExportPDF} className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-peach/30 text-xs font-bold text-slate-700 transition-colors"><FileText size={16} className="text-primary" /> Professional PDF</button>
-                          <button onClick={handleExportWord} className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-peach/30 text-xs font-bold text-slate-700 transition-colors"><FileText size={16} className="text-blue-600" /> Word Document</button>
-                          <button onClick={handleExportJSON} className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-peach/30 text-xs font-bold text-slate-700 transition-colors"><FileJson size={16} className="text-primary" /> JSON Data</button>
-                          <button onClick={handleExportTXT} className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-peach/30 text-xs font-bold text-slate-700 transition-colors"><FileCode size={16} className="text-primary" /> Plain Text</button>
+                        <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-100 rounded-xl shadow-2xl z-50 p-1.5 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                          <button onClick={handleExportPDF} className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors text-left group">
+                            <div className="p-1.5 bg-red-50 text-red-500 rounded-md group-hover:bg-red-100"><FileText size={14} /></div>
+                            Professional PDF
+                          </button>
+                          <button onClick={handleExportWord} className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors text-left group">
+                            <div className="p-1.5 bg-blue-50 text-blue-500 rounded-md group-hover:bg-blue-100"><FileText size={14} /></div>
+                            Word Document
+                          </button>
+                          <button onClick={handleExportJSON} className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors text-left group">
+                            <div className="p-1.5 bg-yellow-50 text-yellow-500 rounded-md group-hover:bg-yellow-100"><FileJson size={14} /></div>
+                            JSON Data
+                          </button>
+                          <button onClick={handleExportTXT} className="w-full flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 text-xs font-bold text-slate-700 transition-colors text-left group">
+                            <div className="p-1.5 bg-slate-100 text-slate-500 rounded-md group-hover:bg-slate-200"><FileCode size={14} /></div>
+                            Plain Text
+                          </button>
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">{questions.map((q) => <QuestionCard key={q.id} question={q} />)}</div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-12">
+                  {questions.map((q) => <QuestionCard key={q.id} question={q} />)}
+                </div>
+
               </div>
             )}
           </div>
         )}
       </main>
-      <footer className="py-8 text-center border-t border-slate-200 bg-white"><p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">QuestAI Enterprise Edition &copy; 2025</p></footer>
+      <footer className="py-6 text-center border-t border-slate-100 bg-white/50 backdrop-blur-sm">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 hover:text-primary transition-colors cursor-default">
+          QuestAI Enterprise Edition &copy; 2025
+        </p>
+      </footer>
+
+      {/* API Key Dialog Logic - Same as before */}
+      {showKeyDialog && (
+        /* ... same dialog code ... */
+        /* including lines 668 to 695 from original file */
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-sm w-full animate-in fade-in zoom-in duration-300">
+            <h3 className="text-xl font-black text-dark mb-3">Configure API Key</h3>
+            <p className="text-xs text-slate-500 mb-5 leading-relaxed">Enter your Google Gemini API Key to enable extraction features. The key is stored locally.</p>
+            <input
+              type="password"
+              value={apiKeyInput}
+              onChange={(e) => setApiKeyInput(e.target.value)}
+              placeholder="Enter Gemini API Key"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl mb-5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowKeyDialog(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-dark transition-colors rounded-lg hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveApiKey}
+                className="px-5 py-2 text-xs font-bold text-white bg-primary rounded-xl hover:bg-secondary shadow-lg shadow-primary/20 transition-all"
+              >
+                Save Connection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

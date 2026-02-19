@@ -3,7 +3,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Question } from "../types";
 
 // Rate limiting configuration
-const MAX_CONCURRENT_REQUESTS = 1;
+const MAX_CONCURRENT_REQUESTS = 10;
 const INITIAL_RETRY_DELAY = 2000;
 const MAX_RETRIES = 5;
 
@@ -85,7 +85,7 @@ const RESPONSE_SCHEMA = {
           question_text: { type: Type.STRING },
           has_diagram: { type: Type.BOOLEAN },
           diagram_description: { type: Type.STRING },
-          diagram_bbox: { 
+          diagram_bbox: {
             type: Type.ARRAY,
             items: { type: Type.NUMBER },
             description: "BBox for the main question diagram [ymin, xmin, ymax, xmax]."
@@ -112,17 +112,28 @@ const RESPONSE_SCHEMA = {
   required: ["questions"]
 };
 
+export const getApiKey = (): string => {
+  return (
+    import.meta.env.VITE_API_KEY ||
+    localStorage.getItem('gemini_api_key') ||
+    ''
+  );
+};
+
 export async function extractQuestionsFromPage(
-  base64Image: string, 
+  base64Image: string,
   pageNumber: number
 ): Promise<Question[]> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error("API Key not found. Please configure it in settings.");
+
+  const ai = new GoogleGenAI({ apiKey });
+
   return requestQueue.add(async () => {
     return retryWithBackoff(async () => {
       try {
         const response = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview', 
+          model: 'gemini-3-flash-preview',
           contents: {
             parts: [
               { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
@@ -136,10 +147,10 @@ export async function extractQuestionsFromPage(
             responseSchema: RESPONSE_SCHEMA
           }
         });
-    
+
         const text = response.text;
         if (!text) return [];
-        
+
         const data = JSON.parse(text);
         return (data.questions || []).map((q: any, idx: number) => ({
           ...q,
@@ -155,8 +166,11 @@ export async function extractQuestionsFromPage(
 }
 
 export async function performOCR(base64Image: string): Promise<string> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error("API Key not found. Please configure it in settings.");
+
+  const ai = new GoogleGenAI({ apiKey });
+
   return requestQueue.add(async () => {
     return retryWithBackoff(async () => {
       try {
@@ -173,7 +187,7 @@ export async function performOCR(base64Image: string): Promise<string> {
             temperature: 0.1,
           }
         });
-    
+
         return response.text || "";
       } catch (error) {
         console.error("OCR Error:", error);
