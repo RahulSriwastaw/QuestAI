@@ -50,62 +50,62 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question }) => {
   }, [question]);
 
   return (
-    <div className="bg-white p-4 rounded-2xl border border-primary/5 soft-shadow hover:shadow-md transition-all duration-200 group flex flex-col h-full compact-card">
-      <div className="flex justify-between items-start mb-2">
+    <div className="bg-white p-5 rounded-2xl border border-primary/5 soft-shadow hover:shadow-md transition-all duration-200 group flex flex-col h-full">
+      <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-6 h-6 rounded-md bg-peach text-primary font-bold text-xs font-display">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-peach text-primary font-bold text-sm font-display">
             {question.question_number}
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1 leading-none pt-[1px]">
-              <FileText size={10} className="flex-shrink-0" /> Page {question.page_number}
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1">
+              <FileText size={10} /> Page {question.page_number}
             </span>
           </div>
         </div>
-        <button onClick={handleCopy} className="p-1 text-slate-300 hover:text-primary transition-all opacity-0 group-hover:opacity-100">
-          {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+        <button onClick={handleCopy} className="p-1.5 text-slate-300 hover:text-primary transition-all opacity-0 group-hover:opacity-100">
+          {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
         </button>
       </div>
 
-      <div className="mb-3 flex-grow">
-        <p ref={questionRef} className="text-dark text-[13px] font-medium leading-relaxed whitespace-pre-wrap selection:bg-peach/30"></p>
+      <div className="mb-4 flex-grow">
+        <p ref={questionRef} className="text-dark text-sm font-medium leading-normal whitespace-pre-wrap"></p>
       </div>
 
       {question.diagram_url && (
-        <div className="mb-3 p-1.5 bg-slate-50/50 rounded-xl border border-slate-100 flex flex-col items-center">
-          <img
-            src={question.diagram_url}
-            alt={question.diagram_alt_text || "Question Diagram"}
+        <div className="mb-4 p-2 bg-slate-50 rounded-xl border border-slate-100 flex flex-col items-center">
+          <img 
+            src={question.diagram_url} 
+            alt={question.diagram_alt_text || "Question Diagram"} 
             title={question.diagram_alt_text}
-            className="max-h-40 object-contain rounded-md"
+            className="max-h-48 object-contain rounded-md" 
           />
           {question.diagram_alt_text && (
-            <p className="mt-1 text-[9px] text-slate-400 italic text-center px-2 line-clamp-1">
+            <p className="mt-2 text-[10px] text-slate-400 italic text-center px-2">
               {question.diagram_alt_text}
             </p>
           )}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-1.5">
+      <div className="grid grid-cols-1 gap-2">
         {['A', 'B', 'C', 'D'].map((key, idx) => {
           const diagramUrl = (question.options as any)[`${key}_diagram_url`];
           return (
-            <div key={key} className="flex flex-col gap-1.5 p-2 rounded-lg border border-slate-50 bg-slate-50/30 hover:bg-white hover:border-primary/20 transition-all text-xs group/opt">
+            <div key={key} className="flex flex-col gap-2 p-3 rounded-xl border border-slate-50 bg-slate-50/50 hover:bg-white hover:border-primary/20 transition-all text-xs">
               <div className="flex items-start gap-2">
-                <span className="font-bold text-primary/70 group-hover/opt:text-primary w-3 mt-0.5">{key}</span>
-                <span ref={el => optionsRefs.current[idx] = el} className="text-slate-600 flex-1 leading-snug"></span>
+                <span className="font-bold text-primary w-4">{key}</span>
+                <span ref={el => optionsRefs.current[idx] = el} className="text-slate-600 flex-1"></span>
               </div>
               {diagramUrl && (
-                <div className="mt-1 flex flex-col items-center bg-white p-1 rounded border border-slate-100/50">
-                  <img
-                    src={diagramUrl}
-                    alt={(question.options as any)[`${key}_diagram_alt_text`] || `Option ${key} Visual`}
+                <div className="mt-1 flex flex-col items-center bg-white p-2 rounded-lg border border-slate-100/50">
+                  <img 
+                    src={diagramUrl} 
+                    alt={(question.options as any)[`${key}_diagram_alt_text`] || `Option ${key} Visual`} 
                     title={(question.options as any)[`${key}_diagram_alt_text`]}
-                    className="max-h-24 object-contain rounded"
+                    className="max-h-32 object-contain rounded" 
                   />
                   {(question.options as any)[`${key}_diagram_alt_text`] && (
-                    <p className="mt-0.5 text-[8px] text-slate-300 italic text-center">
+                    <p className="mt-1 text-[9px] text-slate-400 italic text-center">
                       {(question.options as any)[`${key}_diagram_alt_text`]}
                     </p>
                   )}

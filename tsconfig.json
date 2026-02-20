@@ -23,13 +23,7 @@
         "./*"
       ]
     },
-    "noEmit": true,
     "allowImportingTsExtensions": true,
-  },
-  "include": [
-    "src",
-    "components",
-    "*.ts",
-    "*.tsx"
-  ]
+    "noEmit": true
+  }
 }

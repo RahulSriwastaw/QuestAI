@@ -1,17 +1,85 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuestAI | Smart Paper Extraction</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Math&display=swap');
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-  <script type="importmap">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuestAI | Smart Paper Extraction</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+Math&display=swap');
+        
+        :root {
+          --primary: #FF6B35;
+          --secondary: #FF8C42;
+          --peach: #FFE5D4;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FFFFFF;
+            color: #1A1A1A;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .bg-peach-gradient {
+            background: linear-gradient(135deg, #FFE5D4 0%, #FFDCC5 100%);
+        }
+
+        .bg-orange-gradient {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+        }
+
+        .soft-shadow {
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.1);
+        }
+
+        .btn-shadow {
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .card-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(255, 107, 53, 0.15);
+        }
+
+        /* Custom styles for KaTeX rendered in cards */
+        .math-display {
+            display: inline-block;
+            margin: 0 4px;
+            vertical-align: middle;
+        }
+
+        @media print {
+            .print\:hidden { display: none !important; }
+        }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#FF6B35',
+              secondary: '#FF8C42',
+              peach: '#FFE5D4',
+              dark: '#1A1A1A',
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Poppins', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+<script type="importmap">
 {
   "imports": {
     "@google/genai": "https://esm.sh/@google/genai@^1.41.0",
@@ -23,12 +91,10 @@
   }
 }
 </script>
-  <link rel="stylesheet" href="/index.css">
+<link rel="stylesheet" href="/index.css">
 </head>
-
 <body>
-  <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
 </body>
-
 </html>
