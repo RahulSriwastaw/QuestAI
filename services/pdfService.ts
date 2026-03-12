@@ -6,41 +6,69 @@ declare const pdfjsLib: any;
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 export async function convertPdfToImages(file: File): Promise<PageData[]> {
+  if (!file) throw new Error("No file provided.");
+  if (file.type !== 'application/pdf') throw new Error("Please upload a PDF file.");
+
   try {
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    if (typeof pdfjsLib === 'undefined') {
+      throw new Error("PDF.js library not loaded. Please check your connection.");
+    }
+
+    const loadingTask = pdfjsLib.getDocument({ 
+      data: arrayBuffer,
+      cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+      cMapPacked: true,
+    });
+
+    const pdf = await loadingTask.promise;
     const numPages = pdf.numPages;
+    
+    if (numPages === 0) throw new Error("The PDF document is empty.");
     
     // Create an array of promises to process pages in parallel
     const pagePromises = Array.from({ length: numPages }, async (_, i) => {
-      const pageNumber = i + 1;
-      const page = await pdf.getPage(pageNumber);
-      const viewport = page.getViewport({ scale: 2.0 }); 
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d', { alpha: false });
+      try {
+        const pageNumber = i + 1;
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 2.0 }); 
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d', { alpha: false });
 
-      if (!context) return null;
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-      context.fillStyle = '#ffffff';
-      context.fillRect(0, 0, canvas.width, canvas.height);
+        if (!context) return null;
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        context.fillStyle = '#ffffff';
+        context.fillRect(0, 0, canvas.width, canvas.height);
 
-      await page.render({ canvasContext: context, viewport }).promise;
-      const base64Image = canvas.toDataURL('image/jpeg', 0.85);
-      
-      return {
-        image: base64Image.split(',')[1],
-        pageNumber,
-        width: viewport.width,
-        height: viewport.height
-      };
+        await page.render({ canvasContext: context, viewport }).promise;
+        const base64Image = canvas.toDataURL('image/jpeg', 0.85);
+        
+        return {
+          image: base64Image.split(',')[1],
+          pageNumber,
+          width: viewport.width,
+          height: viewport.height
+        };
+      } catch (err) {
+        console.error(`Error processing page ${i + 1}:`, err);
+        return null;
+      }
     });
 
     const results = await Promise.all(pagePromises);
-    return results.filter((p): p is PageData => p !== null);
-  } catch (error) {
+    const validResults = results.filter((p): p is PageData => p !== null);
+    
+    if (validResults.length === 0) throw new Error("Could not extract any pages from PDF.");
+    
+    return validResults;
+  } catch (error: any) {
     console.error("PDF conversion failed:", error);
-    throw new Error("Could not process PDF.");
+    if (error.name === 'PasswordException') {
+      throw new Error("This PDF is password protected.");
+    }
+    throw new Error(error.message || "Could not process PDF.");
   }
 }
 

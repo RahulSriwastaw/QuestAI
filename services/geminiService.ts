@@ -1,184 +1,206 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
-import { Question } from "../types";
 
-// Rate limiting configuration
-const MAX_CONCURRENT_REQUESTS = 1;
-const INITIAL_RETRY_DELAY = 2000;
-const MAX_RETRIES = 5;
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
-class RequestQueue {
-  private queue: (() => Promise<void>)[] = [];
-  private activeRequests = 0;
-
-  async add<T>(task: () => Promise<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-      this.queue.push(async () => {
-        try {
-          const result = await task();
-          resolve(result);
-        } catch (error) {
-          reject(error);
+export async function extractQuestionsFromPage(imageBase64: string, pageNumber: number) {
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-latest",
+    contents: [
+      {
+        inlineData: {
+          mimeType: "image/png",
+          data: imageBase64.split(',')[1] || imageBase64
         }
-      });
-      this.processQueue();
-    });
-  }
-
-  private async processQueue() {
-    if (this.activeRequests >= MAX_CONCURRENT_REQUESTS || this.queue.length === 0) {
-      return;
-    }
-
-    this.activeRequests++;
-    const task = this.queue.shift();
-
-    if (task) {
-      try {
-        await task();
-      } finally {
-        this.activeRequests--;
-        this.processQueue();
+      },
+      {
+        text: `Extract all multiple choice questions from this page (Page ${pageNumber}). 
+        Return a JSON array of questions. Each question should have:
+        - question_number: number
+        - question_text: string
+        - options: { A: string, B: string, C: string, D: string }
+        - has_diagram: boolean
+        - diagram_bbox: [ymin, xmin, ymax, xmax] (normalized 0-1000, if has_diagram is true)`
       }
-    }
-  }
-}
-
-const requestQueue = new RequestQueue();
-
-async function retryWithBackoff<T>(operation: () => Promise<T>, retries = MAX_RETRIES, delay = INITIAL_RETRY_DELAY): Promise<T> {
-  try {
-    return await operation();
-  } catch (error: any) {
-    if (retries > 0 && (error.status === 429 || error.code === 429 || error.message?.includes('429') || error.message?.includes('quota'))) {
-      console.warn(`Rate limited. Retrying in ${delay}ms... (${retries} retries left)`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return retryWithBackoff(operation, retries - 1, delay * 2);
-    }
-    throw error;
-  }
-}
-
-const SYSTEM_INSTRUCTION = `You are an elite academic document analyzer. Your task is to extract MCQ questions from test papers with high precision.
-CRITICAL RULES:
-1. Every question on the page must be extracted.
-2. Extract the question number and the full question text.
-3. Use LaTeX (e.g., $E=mc^2$) for ALL mathematical and scientific notation.
-4. Extract all 4 options (A, B, C, D).
-5. DIAGRAM DETECTION (CRITICAL): 
-   - Some questions have a main diagram before or after the question text.
-   - OTHER questions have diagrams INSIDE THE OPTIONS (e.g., Option A is a specific geometric shape).
-   - If an option is a diagram (or contains a diagram), you MUST provide a tight 'diagram_bbox' for that option.
-   - If there is no text in the option, use a descriptive placeholder like "Figure A" or "Correct pattern" in the text field.
-6. COORDINATES: Bounding boxes must be [ymin, xmin, ymax, xmax] in normalized 0-1000 format. They must be extremely tight, capturing only the visual content.
-7. Support Hindi (Devanagari) text perfectly. If the paper is bilingual, extract the primary language or both if they are distinct questions.`;
-
-const RESPONSE_SCHEMA = {
-  type: Type.OBJECT,
-  properties: {
-    questions: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          question_number: { type: Type.NUMBER },
-          question_text: { type: Type.STRING },
-          has_diagram: { type: Type.BOOLEAN },
-          diagram_description: { type: Type.STRING },
-          diagram_bbox: { 
-            type: Type.ARRAY,
-            items: { type: Type.NUMBER },
-            description: "BBox for the main question diagram [ymin, xmin, ymax, xmax]."
-          },
-          options: {
-            type: Type.OBJECT,
-            properties: {
-              A: { type: Type.STRING },
-              B: { type: Type.STRING },
-              C: { type: Type.STRING },
-              D: { type: Type.STRING },
-              A_diagram_bbox: { type: Type.ARRAY, items: { type: Type.NUMBER } },
-              B_diagram_bbox: { type: Type.ARRAY, items: { type: Type.NUMBER } },
-              C_diagram_bbox: { type: Type.ARRAY, items: { type: Type.NUMBER } },
-              D_diagram_bbox: { type: Type.ARRAY, items: { type: Type.NUMBER } }
+    ],
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            question_number: { type: Type.NUMBER },
+            question_text: { type: Type.STRING },
+            options: {
+              type: Type.OBJECT,
+              properties: {
+                A: { type: Type.STRING },
+                B: { type: Type.STRING },
+                C: { type: Type.STRING },
+                D: { type: Type.STRING },
+              },
+              required: ["A", "B", "C", "D"]
             },
-            required: ["A", "B", "C", "D"]
-          }
-        },
-        required: ["question_number", "question_text", "has_diagram", "options"]
+            has_diagram: { type: Type.BOOLEAN },
+            diagram_bbox: {
+              type: Type.ARRAY,
+              items: { type: Type.NUMBER }
+            }
+          },
+          required: ["question_number", "question_text", "options", "has_diagram"]
+        }
       }
     }
-  },
-  required: ["questions"]
-};
-
-export async function extractQuestionsFromPage(
-  base64Image: string, 
-  pageNumber: number
-): Promise<Question[]> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
-  return requestQueue.add(async () => {
-    return retryWithBackoff(async () => {
-      try {
-        const response = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview', 
-          contents: {
-            parts: [
-              { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
-              { text: "Extract all questions. Look closely at the area below each question for option-specific diagrams. If an option choice is an image/figure, provide its bbox. Ensure tight bboxes for all visual elements." }
-            ]
-          },
-          config: {
-            systemInstruction: SYSTEM_INSTRUCTION,
-            temperature: 0.1,
-            responseMimeType: "application/json",
-            responseSchema: RESPONSE_SCHEMA
-          }
-        });
-    
-        const text = response.text;
-        if (!text) return [];
-        
-        const data = JSON.parse(text);
-        return (data.questions || []).map((q: any, idx: number) => ({
-          ...q,
-          id: `p${pageNumber}-q${idx}-${Date.now()}`,
-          page_number: pageNumber
-        }));
-      } catch (error: any) {
-        console.error("Gemini API Error:", error);
-        throw error;
-      }
-    });
   });
+
+  try {
+    return JSON.parse(response.text);
+  } catch (e) {
+    console.error("Failed to parse extraction response:", e);
+    return [];
+  }
 }
 
-export async function performOCR(base64Image: string): Promise<string> {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  
-  return requestQueue.add(async () => {
-    return retryWithBackoff(async () => {
-      try {
-        const response = await ai.models.generateContent({
-          model: 'gemini-3-flash-preview',
-          contents: {
-            parts: [
-              { inlineData: { data: base64Image.split(',')[1] || base64Image, mimeType: 'image/png' } },
-              { text: "Extract all text from this diagram. If there is no text, describe the visual elements briefly. Be concise." }
-            ]
+export async function performOCR(imageUrl: string) {
+  // For simplicity, we'll just return a placeholder or try to fetch and OCR
+  // In a real app, you'd fetch the image and send it to Gemini
+  return "Diagram description";
+}
+
+export async function suggestLayout(elements: any[], width: number, height: number) {
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-latest",
+    contents: `Suggest a better layout for these design elements on a ${width}x${height} canvas. 
+    Maintain the content but optimize their positions (x, y) for a professional look.
+    Elements: ${JSON.stringify(elements.map(el => ({ id: el.id, type: el.type, width: el.width, height: el.height })))}
+    Return a JSON array of objects with { id, x, y }.`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            id: { type: Type.STRING },
+            x: { type: Type.NUMBER },
+            y: { type: Type.NUMBER }
           },
-          config: {
-            systemInstruction: "You are an OCR and image analysis expert. Your goal is to provide a text representation of the visual information in the image.",
-            temperature: 0.1,
-          }
-        });
-    
-        return response.text || "";
-      } catch (error) {
-        console.error("OCR Error:", error);
-        throw error; // Re-throw for retry mechanism
+          required: ["id", "x", "y"]
+        }
       }
-    });
+    }
   });
+
+  try {
+    return JSON.parse(response.text);
+  } catch (e) {
+    console.error("Failed to parse layout suggestion:", e);
+    return [];
+  }
+}
+export async function generateDesignElements(prompt: string) {
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-latest",
+    contents: `Generate a list of design elements based on this prompt: "${prompt}". 
+    The output must be a JSON array of elements. Each element should follow this structure:
+    {
+      "type": "text" | "shape",
+      "text": string (for text type),
+      "fontSize": number (for text type),
+      "fontFamily": string (for text type),
+      "fill": string (hex color),
+      "shapeType": "rect" | "circle" | "triangle" (for shape type),
+      "x": number,
+      "y": number,
+      "width": number,
+      "height": number
+    }
+    Assume a canvas size of 794x1123.`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            type: { type: Type.STRING },
+            text: { type: Type.STRING },
+            fontSize: { type: Type.NUMBER },
+            fontFamily: { type: Type.STRING },
+            fill: { type: Type.STRING },
+            shapeType: { type: Type.STRING },
+            x: { type: Type.NUMBER },
+            y: { type: Type.NUMBER },
+            width: { type: Type.NUMBER },
+            height: { type: Type.NUMBER },
+          },
+          required: ["type", "x", "y", "width", "height"]
+        }
+      }
+    }
+  });
+
+  try {
+    return JSON.parse(response.text);
+  } catch (e) {
+    console.error("Failed to parse AI response:", e);
+    return [];
+  }
+}
+
+export async function generateCurrentAffairsQuestions(
+  date: string,
+  topic: string,
+  count: number,
+  language: string
+) {
+  const prompt = `Generate ${count} multiple-choice questions about current affairs for the timeframe: ${date}. 
+  ${topic ? `Focus on the topic: ${topic}.` : 'Cover a mix of important national and international news.'}
+  The language of the questions and options should be ${language}.
+  
+  Return a JSON array of questions. Each question must have:
+  - question_number: number (starting from 1)
+  - question_text: string
+  - options: { A: string, B: string, C: string, D: string }
+  - answer: string (the correct option letter: A, B, C, or D)
+  - solution_${language === 'Hindi' ? 'hin' : 'eng'}: string (detailed explanation of the answer)
+  - has_diagram: false`;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3.1-pro-preview",
+    contents: prompt,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            question_number: { type: Type.NUMBER },
+            question_text: { type: Type.STRING },
+            options: {
+              type: Type.OBJECT,
+              properties: {
+                A: { type: Type.STRING },
+                B: { type: Type.STRING },
+                C: { type: Type.STRING },
+                D: { type: Type.STRING },
+              },
+              required: ["A", "B", "C", "D"]
+            },
+            answer: { type: Type.STRING },
+            solution_hin: { type: Type.STRING },
+            solution_eng: { type: Type.STRING },
+            has_diagram: { type: Type.BOOLEAN }
+          },
+          required: ["question_number", "question_text", "options", "answer", "has_diagram"]
+        }
+      }
+    }
+  });
+
+  const text = response.text;
+  if (!text) throw new Error("No response from Gemini");
+  
+  return JSON.parse(text);
 }

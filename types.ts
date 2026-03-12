@@ -3,6 +3,8 @@ export interface Question {
   id: string;
   question_number: number;
   question_text: string;
+  question_hin?: string;
+  question_eng?: string;
   has_diagram: boolean;
   diagram_description?: string;
   options: {
@@ -10,6 +12,14 @@ export interface Question {
     B: string;
     C: string;
     D: string;
+    A_hin?: string;
+    B_hin?: string;
+    C_hin?: string;
+    D_hin?: string;
+    A_eng?: string;
+    B_eng?: string;
+    C_eng?: string;
+    D_eng?: string;
     A_diagram_bbox?: [number, number, number, number];
     B_diagram_bbox?: [number, number, number, number];
     C_diagram_bbox?: [number, number, number, number];
@@ -27,6 +37,12 @@ export interface Question {
   diagram_bbox?: [number, number, number, number]; // [ymin, xmin, ymax, xmax]
   diagram_url?: string;
   diagram_alt_text?: string;
+  answer?: string;
+  solution_hin?: string;
+  solution_eng?: string;
+  status?: 'active' | 'draft';
+  refinementStatus?: 'pending' | 'final';
+  tags?: string[];
 }
 
 export interface ExtractionResult {
@@ -36,13 +52,47 @@ export interface ExtractionResult {
   questions: Question[];
 }
 
+export interface QuestionSet {
+  id: string;
+  name: string;
+  password?: string;
+  questionIds: string[];
+  createdAt: number;
+}
+
+export interface DocumentData {
+  id: string;
+  name: string;
+  status: 'idle' | 'processing' | 'processed' | 'error';
+  totalPages: number;
+  questionsCount: number;
+  createdAt: string;
+  author: string;
+  folderId?: string | null;
+  pages?: PageData[];
+  questions?: Question[];
+}
+
 export enum ProcessStep {
   IDLE = 'IDLE',
   LOADING_PDF = 'LOADING_PDF',
   CONVERTING_PAGES = 'CONVERTING_PAGES',
+  SELECTING_PAGES = 'SELECTING_PAGES',
   EXTRACTING_DATA = 'EXTRACTING_DATA',
   COMPLETED = 'COMPLETED',
   ERROR = 'ERROR'
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  createdAt: number;
+}
+
+export interface BankQuestion extends Question {
+  folderId: string | null;
+  savedAt: number;
 }
 
 export interface PageData {
