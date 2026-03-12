@@ -1,9 +1,20 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI(): GoogleGenAI {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is missing.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 export async function extractQuestionsFromPage(imageBase64: string, pageNumber: number) {
-  const response = await ai.models.generateContent({
+  const response = await getAI().models.generateContent({
     model: "gemini-3-flash-latest",
     contents: [
       {
@@ -68,7 +79,7 @@ export async function performOCR(imageUrl: string) {
 }
 
 export async function suggestLayout(elements: any[], width: number, height: number) {
-  const response = await ai.models.generateContent({
+  const response = await getAI().models.generateContent({
     model: "gemini-3-flash-latest",
     contents: `Suggest a better layout for these design elements on a ${width}x${height} canvas. 
     Maintain the content but optimize their positions (x, y) for a professional look.
@@ -99,7 +110,7 @@ export async function suggestLayout(elements: any[], width: number, height: numb
   }
 }
 export async function generateDesignElements(prompt: string) {
-  const response = await ai.models.generateContent({
+  const response = await getAI().models.generateContent({
     model: "gemini-3-flash-latest",
     contents: `Generate a list of design elements based on this prompt: "${prompt}". 
     The output must be a JSON array of elements. Each element should follow this structure:
@@ -166,7 +177,7 @@ export async function generateCurrentAffairsQuestions(
   - solution_${language === 'Hindi' ? 'hin' : 'eng'}: string (detailed explanation of the answer)
   - has_diagram: false`;
 
-  const response = await ai.models.generateContent({
+  const response = await getAI().models.generateContent({
     model: "gemini-3.1-pro-preview",
     contents: prompt,
     config: {

@@ -3,11 +3,14 @@ import { PageData } from '../types';
 
 declare const pdfjsLib: any;
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
 export async function convertPdfToImages(file: File): Promise<PageData[]> {
   if (!file) throw new Error("No file provided.");
   if (file.type !== 'application/pdf') throw new Error("Please upload a PDF file.");
+
+  // Configure worker inside the function
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
 
   try {
     const arrayBuffer = await file.arrayBuffer();

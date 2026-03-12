@@ -1,7 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Question } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI(): GoogleGenAI {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is missing.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 export async function bulkEditQuestions(questions: Question[], instruction: string): Promise<{ updatedQuestions: Question[], errors: string[] }> {
   const updatedQuestions: Question[] = [];
@@ -70,7 +81,7 @@ Return updated fields in JSON format:
 }`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await getAI().models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
