@@ -1134,8 +1134,8 @@ const App: React.FC = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         <aside 
-          className={`bg-white border-r border-slate-200 transition-all duration-300 ease-in-out flex flex-col ${
-            isSidebarOpen ? 'w-80' : 'w-0 opacity-0'
+          className={`bg-white border-r border-slate-200 transition-all duration-300 ease-in-out flex flex-col fixed md:relative z-50 h-full ${
+            isSidebarOpen ? 'w-80' : 'w-0'
           } overflow-hidden`}
         >
           <div className="flex flex-col gap-2 p-4 border-b border-slate-100">
