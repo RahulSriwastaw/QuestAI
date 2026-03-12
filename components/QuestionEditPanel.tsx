@@ -70,14 +70,19 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
       <div className="flex flex-col w-full h-full max-w-7xl mx-auto bg-slate-50 shadow-2xl overflow-hidden">
         
         {/* Top Metadata Bar */}
-        <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0 gap-3">
+          <div className="flex items-center justify-between w-full md:w-auto">
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               {isDirty && <span className="w-2 h-2 rounded-full bg-orange-500"></span>}
               Edit Q#{question.question_number}
             </h2>
-            
-            <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
+            <button onClick={onClose} className="md:hidden p-2 text-slate-400 hover:text-slate-600">
+              <X size={20} />
+            </button>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2 md:border-l md:border-slate-200 md:pl-4">
+            <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-slate-500">Status:</span>
               <button 
                 onClick={() => {
@@ -94,33 +99,30 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
               </button>
             </div>
 
-            <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
-              <select 
-                value={subject} 
-                onChange={(e) => { setSubject(e.target.value); setIsDirty(true); }}
-                className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Subject: Select...</option>
-                <option value="physics">Physics</option>
-                <option value="chemistry">Chemistry</option>
-                <option value="math">Mathematics</option>
-                <option value="biology">Biology</option>
-              </select>
-            </div>
+            <select 
+              value={subject} 
+              onChange={(e) => { setSubject(e.target.value); setIsDirty(true); }}
+              className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Subject...</option>
+              <option value="physics">Physics</option>
+              <option value="chemistry">Chemistry</option>
+              <option value="math">Mathematics</option>
+              <option value="biology">Biology</option>
+            </select>
 
-            <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
-              <select 
-                value={difficulty} 
-                onChange={(e) => { setDifficulty(e.target.value as any); setIsDirty(true); }}
-                className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Difficulty: Select...</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-                <option value="very_hard">Very Hard</option>
-              </select>
-            </div>
+            <select 
+              value={difficulty} 
+              onChange={(e) => { setDifficulty(e.target.value as any); setIsDirty(true); }}
+              className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Difficulty...</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+              <option value="very_hard">Very Hard</option>
+            </select>
+          </div>
 
             <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
               <select 

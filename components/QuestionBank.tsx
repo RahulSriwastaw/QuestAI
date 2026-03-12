@@ -208,176 +208,109 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white border-b border-slate-200 p-4 md:p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
           <div>
-            <h2 className="text-2xl font-black text-dark font-display">Question Bank</h2>
-            <p className="text-sm text-slate-400 font-medium">Manage and organize your extracted questions</p>
+            <h2 className="text-xl md:text-2xl font-black text-dark font-display">Question Bank</h2>
+            <p className="text-xs text-slate-400 font-medium">Manage and organize your questions</p>
           </div>
-          <div className="flex bg-slate-100 p-1 rounded-xl">
+          <div className="flex bg-slate-100 p-1 rounded-xl self-start">
             <button 
               onClick={() => setActiveTab('bulk')}
-              className={`px-4 py-2 text-xs font-black uppercase rounded-lg transition-all ${activeTab === 'bulk' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
+              className={`px-3 py-1.5 text-[10px] md:text-xs font-black uppercase rounded-lg transition-all ${activeTab === 'bulk' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
             >
-              Bulk View
+              Bulk
             </button>
             <button 
               onClick={() => setActiveTab('documents')}
-              className={`px-4 py-2 text-xs font-black uppercase rounded-lg transition-all ${activeTab === 'documents' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
+              className={`px-3 py-1.5 text-[10px] md:text-xs font-black uppercase rounded-lg transition-all ${activeTab === 'documents' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
             >
-              Document View
+              Docs
             </button>
           </div>
-          <div className="flex gap-3">
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 text-[11px] font-black uppercase rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
-            >
-              <FileCode size={14} className="text-primary" /> Import CSV
-            </button>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleFileChange} 
-              accept=".csv" 
-              className="hidden" 
-            />
-            {selectedQuestionIds.size > 0 && (
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={() => onBulkDelete(Array.from(selectedQuestionIds))}
-                  className="px-5 py-2.5 bg-red-500 text-white text-[11px] font-black uppercase rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all flex items-center gap-2"
-                >
-                  <Trash2 size={14} /> Delete ({selectedQuestionIds.size})
-                </button>
-                <button 
-                  onClick={() => setShowBulkAIEditModal(true)}
-                  className="px-5 py-2.5 bg-purple-500 text-white text-[11px] font-black uppercase rounded-xl hover:bg-purple-600 shadow-lg shadow-purple-500/20 transition-all flex items-center gap-2"
-                >
-                  <Edit2 size={14} /> Bulk Edit AI ({selectedQuestionIds.size})
-                </button>
-                <button 
-                  onClick={() => setShowBulkTagModal(true)}
-                  className="px-5 py-2.5 bg-blue-500 text-white text-[11px] font-black uppercase rounded-xl hover:bg-blue-600 shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
-                >
-                  <Tag size={14} /> Bulk Tag ({selectedQuestionIds.size})
-                </button>
-                <button 
-                  onClick={() => setShowCreateSetModal(true)}
-                  className="px-5 py-2.5 bg-emerald-500 text-white text-[11px] font-black uppercase rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2"
-                >
-                  <CheckSquare size={14} /> Create Set ({selectedQuestionIds.size})
-                </button>
-              </div>
-            )}
-            <button 
-              onClick={() => setShowNewFolderModal(true)}
-              className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 text-[11px] font-black uppercase rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
-            >
-              <FolderIcon size={14} className="text-primary" /> New Folder
-            </button>
-            <div className="relative">
+        </div>
+        
+        {/* Actions Bar */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="px-3 py-2 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg hover:bg-slate-50 transition-all flex items-center gap-1.5"
+          >
+            <FileCode size={12} className="text-primary" /> Import
+          </button>
+          <button 
+            onClick={() => setShowNewFolderModal(true)}
+            className="px-3 py-2 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg hover:bg-slate-50 transition-all flex items-center gap-1.5"
+          >
+            <FolderIcon size={12} className="text-primary" /> New Folder
+          </button>
+          {selectedQuestionIds.size > 0 && (
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
               <button 
-                onClick={() => setShowExportMenu(!showExportMenu)}
-                disabled={currentQuestions.length === 0}
-                className="px-5 py-2.5 bg-primary text-white text-[11px] font-black uppercase rounded-xl hover:bg-secondary shadow-lg shadow-primary/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => onBulkDelete(Array.from(selectedQuestionIds))}
+                className="px-3 py-2 bg-red-500 text-white text-[10px] font-black uppercase rounded-lg hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all flex items-center gap-1.5"
               >
-                <Download size={14} /> Export Folder <ChevronDown size={12} />
+                <Trash2 size={12} /> Delete ({selectedQuestionIds.size})
               </button>
-              {showExportMenu && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="p-3 border-b border-slate-100 bg-slate-50/50">
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Export Options</h4>
-                  </div>
-                  <div className="p-2 space-y-1">
-                    <button onClick={() => navigate('/editor')} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
-                      <div className="p-2 bg-purple-50 text-purple-500 rounded-lg group-hover:bg-purple-100 transition-colors"><LayoutGrid size={16} /></div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-700">Design Editor</div>
-                        <div className="text-[10px] text-slate-400 font-medium">Open in Canva-like editor</div>
-                      </div>
-                    </button>
-                    <button onClick={() => handleExport('pdf')} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
-                      <div className="p-2 bg-red-50 text-red-500 rounded-lg group-hover:bg-red-100 transition-colors"><FileText size={16} /></div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-700">PDF Document</div>
-                        <div className="text-[10px] text-slate-400 font-medium">Professional layout with diagrams</div>
-                      </div>
-                    </button>
-                    <button onClick={() => handleExport('word')} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
-                      <div className="p-2 bg-blue-50 text-blue-500 rounded-lg group-hover:bg-blue-100 transition-colors"><FileText size={16} /></div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-700">Word Document</div>
-                        <div className="text-[10px] text-slate-400 font-medium">Editable DOCX format</div>
-                      </div>
-                    </button>
-                    <button onClick={() => handleExport('csv')} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
-                      <div className="p-2 bg-green-50 text-green-500 rounded-lg group-hover:bg-green-100 transition-colors"><FileCode size={16} /></div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-700">BigBooster CSV</div>
-                        <div className="text-[10px] text-slate-400 font-medium">Formatted for database import</div>
-                      </div>
-                    </button>
-                    <button onClick={() => handleExport('json')} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
-                      <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg group-hover:bg-yellow-100 transition-colors"><FileJson size={16} /></div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-700">Custom JSON</div>
-                        <div className="text-[10px] text-slate-400 font-medium">Select specific fields to export</div>
-                      </div>
-                    </button>
-                    <button onClick={() => handleExport('txt')} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
-                      <div className="p-2 bg-slate-100 text-slate-600 rounded-lg group-hover:bg-slate-200 transition-colors"><FileText size={16} /></div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-700">Plain Text</div>
-                        <div className="text-[10px] text-slate-400 font-medium">Simple text format</div>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              )}
+              <button 
+                onClick={() => setShowBulkAIEditModal(true)}
+                className="px-3 py-2 bg-purple-500 text-white text-[10px] font-black uppercase rounded-lg hover:bg-purple-600 shadow-lg shadow-purple-500/20 transition-all flex items-center gap-1.5"
+              >
+                <Edit2 size={12} /> AI Edit
+              </button>
+              <button 
+                onClick={() => setShowBulkTagModal(true)}
+                className="px-3 py-2 bg-blue-500 text-white text-[10px] font-black uppercase rounded-lg hover:bg-blue-600 shadow-lg shadow-blue-500/20 transition-all flex items-center gap-1.5"
+              >
+                <Tag size={12} /> Bulk Tag
+              </button>
+              <button 
+                onClick={() => setShowCreateSetModal(true)}
+                className="px-3 py-2 bg-emerald-500 text-white text-[10px] font-black uppercase rounded-lg hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-1.5"
+              >
+                <CheckSquare size={12} /> Create Set
+              </button>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Search and Filter */}
-        <div className="flex gap-4">
+        <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
-              placeholder="Search questions in current folder..." 
+              placeholder="Search..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-primary focus:border-primary transition-all"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-primary focus:border-primary transition-all"
             />
-          </div>
-          <div className="relative">
-            <button 
-              onClick={() => {
-                const select = document.getElementById('status-filter') as HTMLSelectElement;
-                select.click();
-              }}
-              className="px-4 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-black uppercase rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
-            >
-              <Filter size={14} /> {statusFilter}
-            </button>
-            <select 
-              id="status-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'draft')}
-              className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-            >
-              <option value="all">All</option>
-              <option value="active">Active</option>
-              <option value="draft">Draft</option>
-            </select>
           </div>
           <button 
             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-            className="px-4 py-3 bg-white border border-slate-200 text-slate-600 text-xs font-black uppercase rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+            className="px-3 py-2 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg hover:bg-slate-50 transition-all flex items-center gap-1.5"
           >
-            <LayoutGrid size={14} /> {viewMode === 'grid' ? 'List' : 'Grid'}
+            <LayoutGrid size={12} /> {viewMode === 'grid' ? 'List' : 'Grid'}
           </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={currentQuestions.length === 0}
+              className="px-3 py-2 bg-primary text-white text-[10px] font-black uppercase rounded-lg hover:bg-secondary shadow-lg shadow-primary/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <Download size={12} /> Export
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                <button onClick={() => navigate('/editor')} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Design Editor</button>
+                <button onClick={() => handleExport('pdf')} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">PDF Document</button>
+                <button onClick={() => handleExport('word')} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Word Document</button>
+                <button onClick={() => handleExport('csv')} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">CSV</button>
+                <button onClick={() => handleExport('json')} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Custom JSON</button>
+                <button onClick={() => handleExport('txt')} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Plain Text</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
