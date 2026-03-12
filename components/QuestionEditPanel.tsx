@@ -89,11 +89,12 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                   setStatus(s => s === 'draft' ? 'published' : 'draft');
                   setIsDirty(true);
                 }}
-                className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${
-                  status === 'draft' 
-                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200' 
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                }`}
+                className={
+                  'px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ' +
+                  (status === 'draft'
+                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-200')
+                }
               >
                 {status === 'draft' ? 'Draft' : 'Published'}
               </button>
@@ -147,11 +148,12 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             <button 
               onClick={handleSave}
               disabled={!isDirty || isSaving}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
-                isDirty && !isSaving
-                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' 
-                  : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-              }`}
+              className={
+                'flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ' +
+                (isDirty && !isSaving
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                  : 'bg-slate-100 text-slate-400 cursor-not-allowed')
+              }
             >
               {isSaving ? (
                 <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
@@ -169,17 +171,23 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
         <div className="flex items-center px-4 bg-white border-b border-slate-200 shrink-0">
           <button 
             onClick={() => setActiveTab('ai')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ${
-              activeTab === 'ai' ? 'border-purple-500 text-purple-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-            }`}
+            className={
+              'flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ' +
+              (activeTab === 'ai'
+                ? 'border-purple-500 text-purple-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50')
+            }
           >
             <Sparkles size={16} /> AI Edit
           </button>
           <button 
             onClick={() => setActiveTab('pdf')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ${
-              activeTab === 'pdf' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-            }`}
+            className={
+              'flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ' +
+              (activeTab === 'pdf'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50')
+            }
           >
             <FileText size={16} /> Page {question.page_number}
           </button>
@@ -405,7 +413,7 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                   <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                     Solution / Explanation (Optional)
                   </span>
-                  <ChevronRight size={16} className={`text-slate-400 transition-transform ${showExplanation ? 'rotate-90' : ''}`} />
+                  <ChevronRight size={16} className={'text-slate-400 transition-transform ' + (showExplanation ? 'rotate-90' : '')} />
                 </button>
                 {showExplanation && (
                   <div className="p-4 border-t border-slate-200">
