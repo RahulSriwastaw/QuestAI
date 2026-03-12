@@ -55,7 +55,6 @@ import {
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, ImageRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
 import { supabase } from './services/supabaseClient';
-import { useNavigate } from 'react-router-dom';
 
 declare global {
   interface AIStudio {

@@ -64,7 +64,7 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
         </div>
 
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-500 uppercase">Timeframe</label>
               <select 
@@ -114,7 +114,7 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-500 uppercase">Language</label>
               <select 
