@@ -92,6 +92,13 @@ const App: React.FC = () => {
   };
   const [fileName, setFileName] = useState('');
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [activeExportFormat, setActiveExportFormat] = useState<string | null>(null);
+
+  const handleExport = (format: string, exportFn: () => Promise<void> | void) => {
+    setActiveExportFormat(format);
+    exportFn();
+    setShowExportMenu(false);
+  };
   const [showJsonCustomizer, setShowJsonCustomizer] = useState(false);
   const [showSaveToBankModal, setShowSaveToBankModal] = useState(false);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
@@ -1401,28 +1408,28 @@ const App: React.FC = () => {
                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Export Options</h4>
                         </div>
                         <div className="p-2 space-y-1">
-                          <button onClick={() => navigate('/editor')} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
+                          <button onClick={() => handleExport('design', () => navigate('/editor'))} className={`w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group ${activeExportFormat === 'design' ? 'bg-slate-100 border border-slate-200' : ''}`}>
                             <div className="p-2 bg-purple-50 text-purple-500 rounded-lg group-hover:bg-purple-100 transition-colors"><LayoutGrid size={16} /></div>
                             <div>
                               <div className="text-xs font-bold text-slate-700">Design Editor</div>
                               <div className="text-[10px] text-slate-400 font-medium">Open in Canva-like editor</div>
                             </div>
                           </button>
-                          <button onClick={() => handleExportPDF()} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
+                          <button onClick={() => handleExport('pdf', () => handleExportPDF())} className={`w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group ${activeExportFormat === 'pdf' ? 'bg-slate-100 border border-slate-200' : ''}`}>
                             <div className="p-2 bg-red-50 text-red-500 rounded-lg group-hover:bg-red-100 transition-colors"><FileText size={16} /></div>
                             <div>
                               <div className="text-xs font-bold text-slate-700">PDF Document</div>
                               <div className="text-[10px] text-slate-400 font-medium">Professional layout with diagrams</div>
                             </div>
                           </button>
-                          <button onClick={() => handleExportWord()} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
+                          <button onClick={() => handleExport('word', () => handleExportWord())} className={`w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group ${activeExportFormat === 'word' ? 'bg-slate-100 border border-slate-200' : ''}`}>
                             <div className="p-2 bg-blue-50 text-blue-500 rounded-lg group-hover:bg-blue-100 transition-colors"><FileText size={16} /></div>
                             <div>
                               <div className="text-xs font-bold text-slate-700">Word Document</div>
                               <div className="text-[10px] text-slate-400 font-medium">Editable DOCX format</div>
                             </div>
                           </button>
-                          <button onClick={() => handleExportCSV()} className="w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group">
+                          <button onClick={() => handleExport('csv', () => handleExportCSV())} className={`w-full flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-left group ${activeExportFormat === 'csv' ? 'bg-slate-100 border border-slate-200' : ''}`}>
                             <div className="p-2 bg-green-50 text-green-500 rounded-lg group-hover:bg-green-100 transition-colors"><FileCode size={16} /></div>
                             <div>
                               <div className="text-xs font-bold text-slate-700">BigBooster CSV</div>
