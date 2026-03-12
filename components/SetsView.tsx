@@ -170,6 +170,8 @@ const SetsView: React.FC<SetsViewProps> = ({
     );
   }
 
+  const safeSets = sets || [];
+
   return (
     <div className="flex-1 overflow-y-auto bg-slate-50">
       <div className="max-w-7xl mx-auto w-full px-4 py-8">
@@ -180,7 +182,7 @@ const SetsView: React.FC<SetsViewProps> = ({
           </div>
         </div>
 
-        {sets.length === 0 ? (
+        {safeSets.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
             <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-300">
               <Lock size={40} />
@@ -190,7 +192,7 @@ const SetsView: React.FC<SetsViewProps> = ({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sets.map(set => (
+            {safeSets.map(set => (
               <div key={set.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group">
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">

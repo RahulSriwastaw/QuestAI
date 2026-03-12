@@ -85,17 +85,21 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
   
-  const hasFoldersInCurrentDir = folders.some(f => f.parentId === currentFolderId);
-  const currentFolders = folders.filter(f => 
-    f.parentId === currentFolderId && 
-    f.name.toLowerCase().includes(folderSearchQuery.toLowerCase())
+  const safeFolders = folders || [];
+  const safeQuestions = questions || [];
+
+  const hasFoldersInCurrentDir = safeFolders.some(f => f && f.parentId === currentFolderId);
+  const currentFolders = safeFolders.filter(f => 
+    f && f.parentId === currentFolderId && 
+    (f.name || '').toLowerCase().includes((folderSearchQuery || '').toLowerCase())
   );
   
-  const allQuestions = questions.filter(q => {
-    const qText = q.question_text || '';
-    const qHin = q.question_hin || '';
-    const matchesSearch = qText.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          qHin.toLowerCase().includes(searchQuery.toLowerCase());
+  const allQuestions = safeQuestions.filter(q => {
+    const qText = String(q.question_text || '');
+    const qHin = String(q.question_hin || '');
+    const search = String(searchQuery || '').toLowerCase();
+    const matchesSearch = qText.toLowerCase().includes(search) || 
+                          qHin.toLowerCase().includes(search);
     const matchesStatus = statusFilter === 'all' || (q.status === statusFilter);
     const qRefinement = q.refinementStatus || 'pending';
     const matchesRefinement = refinementTab === 'pending' ? (qRefinement !== 'final') : (qRefinement === 'final');
@@ -108,18 +112,19 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
     currentPage * itemsPerPage
   );
 
-  const currentQuestions = questions.filter(q => {
+  const currentQuestions = safeQuestions.filter(q => {
     const inFolder = q.folderId === currentFolderId;
-    const qText = q.question_text || '';
-    const qHin = q.question_hin || '';
-    const matchesSearch = qText.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          qHin.toLowerCase().includes(searchQuery.toLowerCase());
+    const qText = String(q.question_text || '');
+    const qHin = String(q.question_hin || '');
+    const search = String(searchQuery || '').toLowerCase();
+    const matchesSearch = qText.toLowerCase().includes(search) || 
+                          qHin.toLowerCase().includes(search);
     const matchesStatus = statusFilter === 'all' || (q.status === statusFilter);
     return inFolder && matchesSearch && matchesStatus;
   });
 
   const questionsByDocument = currentQuestions.reduce((acc, q) => {
-    const docName = q.id.split('-')[0]; // Assuming doc ID is part of question ID
+    const docName = (q.id || '').split('-')[0] || 'Unknown'; // Assuming doc ID is part of question ID
     if (!acc[docName]) acc[docName] = [];
     acc[docName].push(q);
     return acc;
@@ -167,7 +172,7 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
     let currentId = currentFolderId;
     const path = [];
     while (currentId) {
-      const folder = folders.find(f => f.id === currentId);
+      const folder = safeFolders.find(f => f && f.id === currentId);
       if (folder) {
         path.unshift({ id: folder.id, name: folder.name });
         currentId = folder.parentId;
@@ -407,7 +412,7 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
         onClose={() => setShowBulkTagModal(false)}
         onApply={(tags) => {
           selectedQuestionIds.forEach(id => {
-            const question = questions.find(q => q.id === id);
+            const question = safeQuestions.find(q => q.id === id);
             if (question) {
               onUpdateQuestion && onUpdateQuestion({ ...question, tags: [...(question.tags || []), ...tags] });
             }

@@ -99,19 +99,42 @@ const App: React.FC = () => {
   const [pdfPages, setPdfPages] = useState<PageData[]>([]);
   const [selectedPages, setSelectedPages] = useState<number[]>([]);
   const [documents, setDocuments] = useState<DocumentData[]>(() => {
-    const saved = localStorage.getItem('questai_documents');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('questai_documents');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
   });
 
   const [currentView, setCurrentView] = useState<'extraction' | 'bank' | 'sets' | 'current-affairs'>('extraction');
   const [folders, setFolders] = useState<Folder[]>(() => {
-    const saved = localStorage.getItem('questai_folders');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('questai_folders');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
   });
-  const [bankQuestions, setBankQuestions] = useState<BankQuestion[]>([]);
+  const [bankQuestions, setBankQuestions] = useState<BankQuestion[]>(() => {
+    try {
+      const saved = localStorage.getItem('questai_bank');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [sets, setSets] = useState<QuestionSet[]>(() => {
-    const saved = localStorage.getItem('questai_sets');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('questai_sets');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
   });
 
   useEffect(() => {
@@ -1144,7 +1167,7 @@ const App: React.FC = () => {
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {documents.length === 0 ? (
+            {(documents || []).length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4 opacity-40">
                 <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
                   <FolderIcon size={24} />
@@ -1152,7 +1175,7 @@ const App: React.FC = () => {
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No History</p>
               </div>
             ) : (
-              documents.map((doc) => (
+              (documents || []).map((doc) => (
                 <div 
                   key={doc.id} 
                   onClick={() => handleExtractFromDoc(doc)}
@@ -1299,11 +1322,18 @@ const App: React.FC = () => {
                       : 'border-white hover:border-slate-200'
                   }`}
                 >
-                  <img 
-                    src={`data:image/jpeg;base64,${page.image}`} 
-                    alt={`Page ${page.pageNumber}`}
-                    className="w-full aspect-[1/1.4] object-cover"
-                  />
+                  {page.image ? (
+                    <img 
+                      src={`data:image/jpeg;base64,${page.image}`} 
+                      alt={`Page ${page.pageNumber}`}
+                      className="w-full aspect-[1/1.4] object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[1/1.4] flex items-center justify-center bg-slate-100 text-slate-400 font-bold">
+                      Page {page.pageNumber}
+                    </div>
+                  )}
                   <div className={`absolute inset-0 flex items-center justify-center transition-opacity ${
                     selectedPages.includes(page.pageNumber) ? 'bg-primary/10' : 'bg-black/0 group-hover:bg-black/5'
                   }`}>
