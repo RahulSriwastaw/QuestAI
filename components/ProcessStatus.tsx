@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ProcessStep } from '../types';
 import { Loader2, CheckCircle2, AlertCircle, X, Maximize2, StopCircle, Search, Clock } from 'lucide-react';
 
@@ -20,8 +21,19 @@ const ProcessStatus: React.FC<ProcessStatusProps> = ({ step, progress, message, 
   const isCompleted = step === ProcessStep.COMPLETED;
 
   return (
-    <div className="fixed inset-0 bg-dark/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+    <AnimatePresence>
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-dark/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+      >
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          className="bg-white w-full max-w-2xl rounded-[32px] shadow-2xl overflow-hidden"
+        >
         {/* Modal Header */}
         <div className="p-8 flex justify-between items-start">
           <div className="flex gap-4">
@@ -110,8 +122,9 @@ const ProcessStatus: React.FC<ProcessStatusProps> = ({ step, progress, message, 
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+  </AnimatePresence>
   );
 };
 

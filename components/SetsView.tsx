@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { QuestionSet, BankQuestion, Question } from '../types';
 import { Trash2, Download, Lock, Key, ChevronDown, FileText, FileJson, FileCode, X, LayoutGrid } from 'lucide-react';
 import QuestionCard from './QuestionCard';
@@ -133,24 +134,34 @@ const SetsView: React.FC<SetsViewProps> = ({
             </div>
           </div>
 
-          <div className="space-y-6">
-            {setQuestions.map((q) => (
-              <QuestionCard 
-                key={q.id} 
-                question={q} 
-                onEdit={setEditingQuestion}
-              />
-            ))}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            <AnimatePresence mode="popLayout">
+              {setQuestions.map((q) => (
+                <QuestionCard 
+                  key={q.id} 
+                  question={q} 
+                  onEdit={setEditingQuestion}
+                />
+              ))}
+            </AnimatePresence>
             {setQuestions.length === 0 && (
-              <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm"
+              >
                 <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300">
                   <FileText size={32} />
                 </div>
                 <h3 className="text-lg font-black text-dark mb-1">No Questions Found</h3>
                 <p className="text-sm text-slate-500">This set doesn't have any questions yet.</p>
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* Edit Question Panel */}
@@ -183,68 +194,89 @@ const SetsView: React.FC<SetsViewProps> = ({
         </div>
 
         {safeSets.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm"
+          >
             <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-300">
               <Lock size={40} />
             </div>
             <h3 className="text-xl font-black text-dark mb-2">No Sets Created</h3>
             <p className="text-slate-500 max-w-md mx-auto">Select questions from the Question Bank to create your first set.</p>
-          </div>
+          </motion.div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {safeSets.map(set => (
-              <div key={set.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
-                      {set.password ? <Lock size={24} /> : <FileText size={24} />}
-                    </div>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); onDeleteSet(set.id); }}
-                      className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                  <h3 className="text-lg font-black text-dark mb-1 truncate">{set.name}</h3>
-                  <div className="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    <span>ID: {set.id}</span>
-                    <span>•</span>
-                    <span>{set.questionIds.length} Qs</span>
-                  </div>
-                </div>
-                
-                {selectedSet?.id === set.id && set.password && !unlockedSets.has(set.id) ? (
-                  <form onSubmit={handleUnlock} className="px-6 pb-6 pt-2 border-t border-slate-50 bg-slate-50/50">
-                    <label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Enter Password</label>
-                    <div className="flex gap-2 mb-2">
-                      <input 
-                        type="password" 
-                        value={passwordInput}
-                        onChange={e => setPasswordInput(e.target.value)}
-                        className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                        placeholder="Password..."
-                        autoFocus
-                      />
-                      <button type="submit" className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-secondary transition-colors">
-                        <Key size={16} />
+          <motion.div 
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <AnimatePresence mode="popLayout">
+              {safeSets.map(set => (
+                <motion.div 
+                  key={set.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
+                        {set.password ? <Lock size={24} /> : <FileText size={24} />}
+                      </div>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); onDeleteSet(set.id); }}
+                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 size={18} />
                       </button>
                     </div>
-                    {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
-                  </form>
-                ) : (
-                  <div className="px-6 pb-6 pt-2 border-t border-slate-50 bg-slate-50/50 flex justify-end">
-                    <button 
-                      onClick={() => handleSetClick(set)}
-                      className="text-xs font-black uppercase text-primary hover:text-secondary transition-colors flex items-center gap-1"
-                    >
-                      Open Set <ChevronDown size={14} className="-rotate-90" />
-                    </button>
+                    <h3 className="text-lg font-black text-dark mb-1 truncate">{set.name}</h3>
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <span>ID: {set.id}</span>
+                      <span>•</span>
+                      <span>{set.questionIds.length} Qs</span>
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  
+                  {selectedSet?.id === set.id && set.password && !unlockedSets.has(set.id) ? (
+                    <motion.form 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      onSubmit={handleUnlock} 
+                      className="px-6 pb-6 pt-2 border-t border-slate-50 bg-slate-50/50"
+                    >
+                      <label className="block text-[10px] font-black uppercase text-slate-400 mb-2">Enter Password</label>
+                      <div className="flex gap-2 mb-2">
+                        <input 
+                          type="password" 
+                          value={passwordInput}
+                          onChange={e => setPasswordInput(e.target.value)}
+                          className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                          placeholder="Password..."
+                          autoFocus
+                        />
+                        <button type="submit" className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-secondary transition-colors">
+                          <Key size={16} />
+                        </button>
+                      </div>
+                      {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
+                    </motion.form>
+                  ) : (
+                    <div className="px-6 pb-6 pt-2 border-t border-slate-50 bg-slate-50/50 flex justify-end">
+                      <button 
+                        onClick={() => handleSetClick(set)}
+                        className="text-xs font-black uppercase text-primary hover:text-secondary transition-colors flex items-center gap-1"
+                      >
+                        Open Set <ChevronDown size={14} className="-rotate-90" />
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Folder, BankQuestion, Question, QuestionSet } from '../types';
 import { 
   Folder as FolderIcon, 
@@ -390,20 +391,25 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
                       )}
                     </button>
                   </div>
-                  <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
-                    {paginatedQuestions.map(q => (
-                      <QuestionCard 
-                        key={q.id} 
-                        question={q} 
-                        selected={selectedQuestionIds.has(q.id)}
-                        onSelect={toggleQuestionSelection}
-                        onEdit={setEditingQuestion}
-                        onDelete={() => setQuestionToDelete(q.id)}
-                        onToggleStatus={(status) => onUpdateQuestion && onUpdateQuestion({ ...q, status })}
-                        onToggleRefinement={(refinementStatus) => onUpdateQuestion && onUpdateQuestion({ ...q, refinementStatus })}
-                      />
-                    ))}
-                  </div>
+                  <motion.div 
+                    layout
+                    className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}
+                  >
+                    <AnimatePresence mode="popLayout">
+                      {paginatedQuestions.map(q => (
+                        <QuestionCard 
+                          key={q.id} 
+                          question={q} 
+                          selected={selectedQuestionIds.has(q.id)}
+                          onSelect={toggleQuestionSelection}
+                          onEdit={setEditingQuestion}
+                          onDelete={() => setQuestionToDelete(q.id)}
+                          onToggleStatus={(status) => onUpdateQuestion && onUpdateQuestion({ ...q, status })}
+                          onToggleRefinement={(refinementStatus) => onUpdateQuestion && onUpdateQuestion({ ...q, refinementStatus })}
+                        />
+                      ))}
+                    </AnimatePresence>
+                  </motion.div>
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-8 py-4 border-t border-slate-100">
                       <button 
@@ -446,31 +452,40 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
                       </div>
                     </div>
                     {currentFolders.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {currentFolders.map(folder => (
-                          <div 
-                            key={folder.id}
-                            onClick={() => setCurrentFolderId(folder.id)}
-                            className="bg-white p-4 rounded-2xl border border-slate-200 hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group flex items-center justify-between"
-                          >
-                            <div className="flex items-center gap-3 overflow-hidden">
-                              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-                                <FolderIcon size={20} />
-                              </div>
-                              <span className="font-bold text-sm text-slate-700 truncate">{folder.name}</span>
-                            </div>
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteFolder(folder.id);
-                              }}
-                              className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                      <motion.div 
+                        layout
+                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                      >
+                        <AnimatePresence mode="popLayout">
+                          {currentFolders.map(folder => (
+                            <motion.div 
+                              key={folder.id}
+                              layout
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              onClick={() => setCurrentFolderId(folder.id)}
+                              className="bg-white p-4 rounded-2xl border border-slate-200 hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group flex items-center justify-between"
                             >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                              <div className="flex items-center gap-3 overflow-hidden">
+                                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
+                                  <FolderIcon size={20} />
+                                </div>
+                                <span className="font-bold text-sm text-slate-700 truncate">{folder.name}</span>
+                              </div>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDeleteFolder(folder.id);
+                                }}
+                                className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </motion.div>
                     ) : (
                       <div className="text-center py-8 text-slate-400 text-sm">
                         No folders found matching "{folderSearchQuery}"
@@ -487,19 +502,24 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
                         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                           <FileText size={12} /> {docName} ({questions.length} questions)
                         </h3>
-                        <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}>
-                          {questions.map(q => (
-                            <QuestionCard 
-                              key={q.id} 
-                              question={q} 
-                              selected={selectedQuestionIds.has(q.id)}
-                              onSelect={toggleQuestionSelection}
-                              onEdit={setEditingQuestion}
-                              onDelete={() => setQuestionToDelete(q.id)}
-                              onToggleStatus={(status) => onUpdateQuestion && onUpdateQuestion({ ...q, status })}
-                            />
-                          ))}
-                        </div>
+                        <motion.div 
+                          layout
+                          className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "space-y-4"}
+                        >
+                          <AnimatePresence mode="popLayout">
+                            {questions.map(q => (
+                              <QuestionCard 
+                                key={q.id} 
+                                question={q} 
+                                selected={selectedQuestionIds.has(q.id)}
+                                onSelect={toggleQuestionSelection}
+                                onEdit={setEditingQuestion}
+                                onDelete={() => setQuestionToDelete(q.id)}
+                                onToggleStatus={(status) => onUpdateQuestion && onUpdateQuestion({ ...q, status })}
+                              />
+                            ))}
+                          </AnimatePresence>
+                        </motion.div>
                       </div>
                     ))}
                   </div>

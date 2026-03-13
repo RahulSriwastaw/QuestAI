@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { generateCurrentAffairsQuestions } from '../services/geminiService';
 import { Question } from '../types';
 import { Calendar, Loader2, Save, Globe, BookOpen } from 'lucide-react';
@@ -51,7 +52,11 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-8">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="max-w-3xl mx-auto p-6 space-y-8"
+    >
       <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
@@ -172,6 +177,6 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
