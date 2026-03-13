@@ -107,47 +107,47 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
 
       <div className={`flex flex-col ${viewMode === 'list' ? 'flex-1 border-r border-slate-100' : 'w-full'}`}>
         {/* Header Section */}
-        <div className="px-1.5 py-1 border-b border-slate-100 flex items-center justify-between bg-white z-10">
-          <div className="flex items-center gap-1">
+        <div className="px-2 py-1.5 border-b border-slate-100 flex items-center justify-between bg-white z-10">
+          <div className="flex items-center gap-1.5">
             {onSelect && (
               <div 
                 onClick={() => onSelect(question.id)}
-                className={`w-3 h-3 rounded border flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                className={`w-3.5 h-3.5 rounded border flex items-center justify-center cursor-pointer transition-all duration-200 ${
                   selected ? 'bg-primary border-primary' : 'border-slate-300 hover:border-primary'
                 }`}
               >
-                {selected && <Check size={7} className="text-white stroke-[4]" />}
+                {selected && <Check size={8} className="text-white stroke-[4]" />}
               </div>
             )}
-            <div className="flex items-center gap-0.5">
-              <div className={`flex items-center justify-center w-3.5 h-3.5 rounded font-black text-[7px] transition-colors duration-200 ${
+            <div className="flex items-center gap-1">
+              <div className={`flex items-center justify-center w-4 h-4 rounded font-black text-[10px] transition-colors duration-200 ${
                 selected ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-primary/10 group-hover:text-primary'
               }`}>
                 {question.question_number}
               </div>
               <div className="flex flex-col">
-                <span className="text-[6px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">
                   Q
                 </span>
-                <span className={`text-[6px] font-bold uppercase tracking-wider leading-none ${isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
+                <span className={`text-[8px] font-bold uppercase tracking-wider leading-none ${isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
                   {isActive ? 'A' : 'D'}
                 </span>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-0.5">
+          <div className="flex items-center gap-1">
             <button 
-              className={`w-5 h-3 rounded-full relative cursor-pointer transition-all duration-300 ${isActive ? 'bg-emerald-500' : 'bg-slate-200'}`} 
+              className={`w-6 h-3.5 rounded-full relative cursor-pointer transition-all duration-300 ${isActive ? 'bg-emerald-500' : 'bg-slate-200'}`} 
               onClick={toggleStatus}
             >
               <motion.div 
-                animate={{ x: isActive ? 8 : 1 }}
-                className="absolute top-0.5 w-2 h-2 bg-white rounded-full shadow-sm"
+                animate={{ x: isActive ? 10 : 2 }}
+                className="absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full shadow-sm"
               />
             </button>
             <button className="p-0.5 text-slate-400 hover:text-slate-600 rounded hover:bg-slate-100 transition-colors">
-              <MoreVertical size={10} />
+              <MoreVertical size={12} />
             </button>
           </div>
         </div>
