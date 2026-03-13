@@ -16,6 +16,7 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
   const [topic, setTopic] = useState('');
   const [count, setCount] = useState(10);
   const [language, setLanguage] = useState('English');
+  const [isBilingual, setIsBilingual] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
@@ -26,13 +27,15 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
       if (timeframe === 'Monthly') targetDate = month;
       if (timeframe === 'Yearly') targetDate = year;
 
-      const generated = await generateCurrentAffairsQuestions(targetDate, topic, count, language);
+      const generated = await generateCurrentAffairsQuestions(targetDate, topic, count, language, isBilingual);
       
       // Map to Question type
       const formattedQuestions: Question[] = generated.map((q: any) => ({
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         question_number: q.question_number,
-        question_text: q.question_text,
+        question_text: isBilingual ? `${q.question_eng} / ${q.question_hin}` : q.question_text,
+        question_eng: q.question_eng,
+        question_hin: q.question_hin,
         options: q.options,
         answer: q.answer,
         solution_hin: q.solution_hin,
@@ -122,14 +125,25 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[9px] font-bold text-slate-500 uppercase">Language</label>
-              <select 
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-              >
-                <option value="English">English</option>
-                <option value="Hindi">Hindi</option>
-              </select>
+              <div className="flex items-center gap-4">
+                <select 
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                >
+                  <option value="English">English</option>
+                  <option value="Hindi">Hindi</option>
+                </select>
+                <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={isBilingual}
+                    onChange={(e) => setIsBilingual(e.target.checked)}
+                    className="accent-primary"
+                  />
+                  Bilingual
+                </label>
+              </div>
             </div>
             
             <div className="space-y-1.5">

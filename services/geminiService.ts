@@ -163,18 +163,23 @@ export async function generateCurrentAffairsQuestions(
   date: string,
   topic: string,
   count: number,
-  language: string
+  language: string,
+  isBilingual: boolean
 ) {
   const prompt = `Generate ${count} multiple-choice questions about current affairs for the timeframe: ${date}. 
   ${topic ? `Focus on the topic: ${topic}.` : 'Cover a mix of important national and international news.'}
   The language of the questions and options should be ${language}.
+  ${isBilingual ? 'Also, provide the question text in both English and Hindi.' : ''}
   
   Return a JSON array of questions. Each question must have:
   - question_number: number (starting from 1)
-  - question_text: string
+  - question_text: string (in the selected language)
+  - question_eng: string (in English)
+  - question_hin: string (in Hindi)
   - options: { A: string, B: string, C: string, D: string }
   - answer: string (the correct option letter: A, B, C, or D)
-  - solution_${language === 'Hindi' ? 'hin' : 'eng'}: string (detailed explanation of the answer)
+  - solution_hin: string (detailed explanation of the answer in Hindi)
+  - solution_eng: string (detailed explanation of the answer in English)
   - has_diagram: false`;
 
   const response = await getAI().models.generateContent({
@@ -189,6 +194,8 @@ export async function generateCurrentAffairsQuestions(
           properties: {
             question_number: { type: Type.NUMBER },
             question_text: { type: Type.STRING },
+            question_eng: { type: Type.STRING },
+            question_hin: { type: Type.STRING },
             options: {
               type: Type.OBJECT,
               properties: {
@@ -204,7 +211,7 @@ export async function generateCurrentAffairsQuestions(
             solution_eng: { type: Type.STRING },
             has_diagram: { type: Type.BOOLEAN }
           },
-          required: ["question_number", "question_text", "options", "answer", "has_diagram"]
+          required: ["question_number", "question_text", "question_eng", "question_hin", "options", "answer", "solution_hin", "solution_eng", "has_diagram"]
         }
       }
     }

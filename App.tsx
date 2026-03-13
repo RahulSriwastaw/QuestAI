@@ -985,7 +985,7 @@ const App: React.FC = () => {
           console.log('CSV parse complete:', results);
           if (results.errors.length > 0) {
             console.error('CSV parse errors:', results.errors);
-            setToast({ message: `Import finished with ${results.errors.length} errors.`, type: 'warning' });
+            setToast({ message: `Import finished with ${results.errors.length} errors.`, type: 'error' });
           }
           const folderName = file.name.replace(/\.[^/.]+$/, "");
           const newFolder: Folder = {
@@ -1414,47 +1414,47 @@ const App: React.FC = () => {
                   onUpdateQuestion={handleUpdateBankQuestion}
                 />
               ) : currentView === 'current-affairs' ? (
-                <div className="flex-1 h-full bg-slate-50">
+                <div className="flex-1 h-full bg-gradient-to-br from-slate-50 to-slate-100">
                   <CurrentAffairsGenerator onQuestionsGenerated={handleCurrentAffairsGenerated} />
                 </div>
               ) : (
-                <div className="flex-1 h-full bg-slate-50">
-                  <div className="max-w-7xl mx-auto w-full px-6 py-10">
+                <div className="flex-1 h-full bg-gradient-to-br from-slate-50 to-slate-100">
+                  <div className="max-w-7xl mx-auto w-full px-4 py-6">
                   {step === ProcessStep.IDLE ? (
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.9 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="h-full flex flex-col items-center justify-center text-center space-y-8 py-20"
+                      className="h-full flex flex-col items-center justify-center text-center space-y-6 py-10"
                     >
-                      <div className="w-28 h-28 bg-white rounded-[40px] shadow-2xl flex items-center justify-center text-primary mb-4 animate-float">
-                        <UploadCloud size={56} />
+                      <div className="w-20 h-20 bg-white rounded-3xl shadow-lg flex items-center justify-center text-primary mb-2 animate-float">
+                        <UploadCloud size={40} />
                       </div>
-                      <div className="max-w-xl">
-                        <h1 className="text-5xl font-black text-dark font-display mb-4 leading-tight">Ready to Extract?</h1>
-                        <p className="text-slate-500 font-medium text-lg">Select a document from the sidebar or upload a new PDF to start extracting questions with intelligent AI.</p>
+                      <div className="max-w-md">
+                        <h1 className="text-3xl font-black text-dark font-display mb-2 leading-tight">Ready to Extract?</h1>
+                        <p className="text-slate-500 font-medium text-sm">Select a document from the sidebar or upload a new PDF to start extracting questions with intelligent AI.</p>
                       </div>
                       <button 
                         onClick={() => setShowUploadModal(true)}
-                        className="group px-10 py-5 bg-primary text-white font-black uppercase tracking-widest rounded-2xl hover:bg-secondary shadow-2xl shadow-primary/30 transition-all transform hover:-translate-y-1 flex items-center gap-3"
+                        className="group px-6 py-3 bg-primary text-white font-black uppercase tracking-widest rounded-xl hover:bg-secondary shadow-lg shadow-primary/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-xs"
                       >
-                        Upload PDF <Plus size={20} className="group-hover:rotate-90 transition-transform" />
+                        Upload PDF <Plus size={14} className="group-hover:rotate-90 transition-transform" />
                       </button>
                     </motion.div>
                   ) : step === ProcessStep.SELECTING_PAGES ? (
-                <div className="max-w-5xl mx-auto space-y-10">
-                  <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <button onClick={reset} className="flex items-center gap-2 text-xs font-black uppercase text-slate-400 hover:text-primary transition-colors">
-                      <ArrowLeft size={16} /> Cancel
+                <div className="max-w-5xl mx-auto space-y-6">
+                  <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                    <button onClick={reset} className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 hover:text-primary transition-colors">
+                      <ArrowLeft size={12} /> Cancel
                     </button>
                     <div className="text-center">
-                      <h2 className="text-2xl font-black text-dark font-display">Select Pages</h2>
-                      <p className="text-sm text-slate-400 font-medium">{fileName} • {pdfPages.length} pages total</p>
+                      <h2 className="text-lg font-black text-dark font-display">Select Pages</h2>
+                      <p className="text-[10px] text-slate-400 font-medium">{fileName} • {pdfPages.length} pages total</p>
                     </div>
                     <button 
                       onClick={startExtraction}
-                      className="px-8 py-3 bg-primary text-white text-xs font-black uppercase rounded-xl hover:bg-secondary shadow-lg shadow-primary/20 transition-all flex items-center gap-2"
+                      className="px-6 py-2 bg-primary text-white text-[10px] font-black uppercase rounded-lg hover:bg-secondary shadow-md shadow-primary/20 transition-all flex items-center gap-1.5"
                     >
-                      Generate <FileOutput size={16} />
+                      Generate <FileOutput size={12} />
                     </button>
                   </div>
 
