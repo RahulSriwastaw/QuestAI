@@ -10,7 +10,7 @@ interface QuestionEditPanelProps {
   question: Question;
   onClose: () => void;
   onSave: (updatedQuestion: Question) => void;
-  pdfUrl?: string; // Optional PDF URL for the viewer
+  pdfUrl?: string;
 }
 
 export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, onClose, onSave, pdfUrl }) => {
@@ -24,7 +24,6 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
   const [isSaving, setIsSaving] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
 
-  // Handle changes
   const handleChange = (field: keyof Question, value: any) => {
     setEditedQuestion(prev => ({ ...prev, [field]: value }));
     setIsDirty(true);
@@ -57,7 +56,6 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
 
   const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
     setTimeout(() => {
       onSave(editedQuestion);
       setIsSaving(false);
@@ -66,10 +64,9 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex bg-black bg-opacity-50 backdrop-blur-sm">
       <div className="flex flex-col w-full h-full max-w-7xl mx-auto bg-slate-50 shadow-2xl overflow-hidden">
         
-        {/* Top Metadata Bar */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0 gap-3">
           <div className="flex items-center justify-between w-full md:w-auto">
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -89,12 +86,11 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                   setStatus(s => s === 'draft' ? 'published' : 'draft');
                   setIsDirty(true);
                 }}
-                className={
-                  'px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ' +
-                  (status === 'draft'
-                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-200')
-                }
+                className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${
+                  status === 'draft' 
+                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200' 
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                }`}
               >
                 {status === 'draft' ? 'Draft' : 'Published'}
               </button>
@@ -125,38 +121,36 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             </select>
           </div>
 
-            <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
-              <select 
-                value={questionType} 
-                onChange={(e) => { setQuestionType(e.target.value); setIsDirty(true); }}
-                className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="mcq_single">MCQ Single</option>
-                <option value="mcq_multiple">MCQ Multiple</option>
-                <option value="integer">Integer Type</option>
-                <option value="true_false">True/False</option>
-                <option value="fill_blank">Fill in the Blank</option>
-                <option value="assertion_reason">Assertion-Reason</option>
-                <option value="match_column">Match the Column</option>
-                <option value="numerical">Numerical Value</option>
-              </select>
-            </div>
+          <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
+            <select 
+              value={questionType} 
+              onChange={(e) => { setQuestionType(e.target.value); setIsDirty(true); }}
+              className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="mcq_single">MCQ Single</option>
+              <option value="mcq_multiple">MCQ Multiple</option>
+              <option value="integer">Integer Type</option>
+              <option value="true_false">True/False</option>
+              <option value="fill_blank">Fill in the Blank</option>
+              <option value="assertion_reason">Assertion-Reason</option>
+              <option value="match_column">Match the Column</option>
+              <option value="numerical">Numerical Value</option>
+            </select>
           </div>
 
           <div className="flex items-center gap-3">
-            {!isDirty && <span className="text-xs text-orange-500 font-medium">⚠ Make changes to enable save</span>}
+            {!isDirty && <span className="text-xs text-orange-500 font-medium">Make changes to enable save</span>}
             <button 
               onClick={handleSave}
               disabled={!isDirty || isSaving}
-              className={
-                'flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ' +
-                (isDirty && !isSaving
-                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
-                  : 'bg-slate-100 text-slate-400 cursor-not-allowed')
-              }
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+                isDirty && !isSaving
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' 
+                  : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              }`}
             >
               {isSaving ? (
-                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
+                <><div className="w-4 h-4 border-2 border-white border-opacity-30 border-t-white rounded-full animate-spin" /> Saving...</>
               ) : (
                 <><Save size={16} /> Save Changes</>
               )}
@@ -167,36 +161,27 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
           </div>
         </div>
 
-        {/* Tab Bar */}
         <div className="flex items-center px-4 bg-white border-b border-slate-200 shrink-0">
           <button 
             onClick={() => setActiveTab('ai')}
-            className={
-              'flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ' +
-              (activeTab === 'ai'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50')
-            }
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ${
+              activeTab === 'ai' ? 'border-purple-500 text-purple-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            }`}
           >
             <Sparkles size={16} /> AI Edit
           </button>
           <button 
             onClick={() => setActiveTab('pdf')}
-            className={
-              'flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ' +
-              (activeTab === 'pdf'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50')
-            }
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ${
+              activeTab === 'pdf' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            }`}
           >
             <FileText size={16} /> Page {question.page_number}
           </button>
         </div>
 
-        {/* Main Content Area */}
         <div className="flex flex-1 overflow-hidden">
           
-          {/* Left Panel: PDF Viewer or AI Edit */}
           <div className="w-1/2 border-r border-slate-200 bg-slate-100 flex flex-col overflow-hidden">
             {activeTab === 'pdf' ? (
               <>
@@ -214,13 +199,11 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                   </div>
                 </div>
                 <div className="flex-1 overflow-auto p-4 flex items-center justify-center relative">
-                  {/* Mock PDF Viewer */}
-                  <div className="w-full max-w-lg aspect-[1/1.4] bg-white shadow-md relative">
+                  <div className="w-full max-w-lg aspect-square bg-white shadow-md relative">
                     <div className="absolute inset-0 flex items-center justify-center text-slate-300 font-medium">
                       {pdfUrl ? "PDF Viewer Loading..." : "No PDF Source Available"}
                     </div>
-                    {/* Mock Highlight */}
-                    <div className="absolute top-1/4 left-10 right-10 h-32 bg-yellow-400/20 border-2 border-yellow-400/50 rounded pointer-events-none"></div>
+                    <div className="absolute top-[25%] left-10 right-10 h-32 bg-yellow-400 bg-opacity-20 border-2 border-yellow-400 border-opacity-50 rounded pointer-events-none"></div>
                   </div>
                 </div>
               </>
@@ -253,7 +236,6 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             )}
           </div>
 
-          {/* Right Panel: Question Editor */}
           <div className="w-1/2 overflow-auto bg-slate-50 p-6">
             <div className="max-w-2xl mx-auto space-y-6">
               
@@ -261,11 +243,10 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                 + Add Passage/Instruction
               </button>
 
-              {/* Question Stem */}
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                    🔥 QUESTION
+                    QUESTION
                   </span>
                   <div className="flex items-center gap-1">
                     <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Bold size={14} /></button>
@@ -289,7 +270,6 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                 </div>
               </div>
 
-              {/* Image Manager */}
               {editedQuestion.diagram_url ? (
                 <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                   <div className="flex items-start justify-between mb-2">
@@ -326,7 +306,7 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
               ) : (
                 <label className="w-full py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-medium text-sm hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer">
                   <ImageIcon size={24} className="text-slate-400" />
-                  🖼 Add Image (Optional)
+                  Add Image (Optional)
                   <input 
                     type="file" 
                     accept="image/*" 
@@ -336,7 +316,6 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                 </label>
               )}
 
-              {/* Options Editor */}
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
                   <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -404,16 +383,15 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                 </div>
               </div>
 
-              {/* Explanation */}
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <button 
                   onClick={() => setShowExplanation(!showExplanation)}
                   className="w-full px-4 py-3 bg-slate-50 flex items-center justify-between hover:bg-slate-100 transition-colors"
                 >
                   <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Solution / Explanation (Optional)
+                    Solution and Explanation (Optional)
                   </span>
-                  <ChevronRight size={16} className={'text-slate-400 transition-transform ' + (showExplanation ? 'rotate-90' : '')} />
+                  <ChevronRight size={16} className={`text-slate-400 transition-transform ${showExplanation ? 'rotate-90' : ''}`} />
                 </button>
                 {showExplanation && (
                   <div className="p-4 border-t border-slate-200">
@@ -431,7 +409,6 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
           </div>
         </div>
 
-        {/* Footer Navigation */}
         <div className="flex items-center justify-between px-6 py-3 bg-white border-t border-slate-200 shrink-0">
           <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
             <ChevronLeft size={16} /> Previous
@@ -443,7 +420,6 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             Next <ChevronRight size={16} />
           </button>
         </div>
-
       </div>
     </div>
   );
