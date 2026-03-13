@@ -180,11 +180,29 @@ const App: React.FC = () => {
   }, [folders]);
 
   const [activeDocumentId, setActiveDocumentId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const closeSidebarOnMobile = () => {
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (toast) {
@@ -246,6 +264,7 @@ const App: React.FC = () => {
   const handleExtractFromDoc = async (doc: DocumentData) => {
     setActiveDocumentId(doc.id);
     setFileName(doc.name);
+    closeSidebarOnMobile();
     
     if (doc.status === 'processed' && doc.questions) {
       setQuestions(doc.questions);
@@ -1131,49 +1150,72 @@ const App: React.FC = () => {
       </nav>
 
       <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar Backdrop for Mobile */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-dark/40 backdrop-blur-sm z-[55] md:hidden transition-opacity duration-300"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
         {/* Sidebar */}
         <aside 
-          className={`bg-white border-r border-slate-200 transition-all duration-300 ease-in-out flex flex-col fixed md:relative z-50 h-full ${
-            isSidebarOpen ? 'w-80' : 'w-0'
+          className={`bg-white border-r border-slate-200 transition-all duration-300 ease-in-out flex flex-col fixed md:relative z-[60] md:z-40 h-full shadow-2xl md:shadow-none ${
+            isSidebarOpen ? 'w-72 translate-x-0' : 'w-0 -translate-x-full md:translate-x-0'
           } overflow-hidden`}
         >
-          <div className="flex flex-col gap-2 p-4 border-b border-slate-100">
+          <div className="flex items-center justify-between p-4 border-b border-slate-100 md:hidden">
+            <div className="flex items-center gap-1.5">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Database className="text-white w-4 h-4" />
+              </div>
+              <span className="text-lg font-bold text-dark font-display">QuestAI</span>
+            </div>
             <button 
-              onClick={() => setCurrentView('extraction')}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${currentView === 'extraction' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-2 hover:bg-slate-50 rounded-xl text-slate-400 transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-1.5 p-3 border-b border-slate-100">
+            <button 
+              onClick={() => { setCurrentView('extraction'); closeSidebarOnMobile(); }}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${currentView === 'extraction' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
             >
               <UploadCloud size={18} /> Extraction
             </button>
             <button 
-              onClick={() => setCurrentView('bank')}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${currentView === 'bank' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
+              onClick={() => { setCurrentView('bank'); closeSidebarOnMobile(); }}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${currentView === 'bank' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
             >
               <Database size={18} /> Question Bank
             </button>
             <button 
-              onClick={() => setCurrentView('sets')}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${currentView === 'sets' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
+              onClick={() => { setCurrentView('sets'); closeSidebarOnMobile(); }}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${currentView === 'sets' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
             >
               <Layers size={18} /> Sets
             </button>
             <button 
-              onClick={() => setCurrentView('current-affairs')}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all ${currentView === 'current-affairs' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
+              onClick={() => { setCurrentView('current-affairs'); closeSidebarOnMobile(); }}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${currentView === 'current-affairs' ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:bg-slate-50'}`}
             >
               <Globe size={18} /> Current Affairs
             </button>
           </div>
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="text-sm font-black text-dark uppercase tracking-widest">Documents</h3>
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-[10px] font-black text-dark uppercase tracking-widest">Documents</h3>
             <button 
-              onClick={() => setShowUploadModal(true)}
-              className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+              onClick={() => { setShowUploadModal(true); closeSidebarOnMobile(); }}
+              className="p-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
               title="Upload PDF"
             >
-              <Plus size={16} />
+              <Plus size={14} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
             {(documents || []).length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4 opacity-40">
                 <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
