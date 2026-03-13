@@ -209,22 +209,22 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-50">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 p-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-1.5 gap-1">
+      <div className="bg-white border-b border-slate-200 p-1.5 md:p-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-1 gap-1">
           <div>
-            <h2 className="text-lg font-black text-dark font-display">Question Bank</h2>
-            <p className="text-[9px] text-slate-400 font-medium">Manage and organize your questions</p>
+            <h2 className="text-sm md:text-lg font-black text-dark font-display">Question Bank</h2>
+            <p className="text-[8px] md:text-[9px] text-slate-400 font-medium">Manage and organize your questions</p>
           </div>
           <div className="flex bg-slate-100 p-0.5 rounded-md self-start">
             <button 
               onClick={() => setActiveTab('bulk')}
-              className={`px-2 py-1 text-[9px] font-black uppercase rounded transition-all ${activeTab === 'bulk' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
+              className={`px-1.5 py-0.5 text-[8px] md:text-[9px] font-black uppercase rounded transition-all ${activeTab === 'bulk' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
             >
               Bulk
             </button>
             <button 
               onClick={() => setActiveTab('documents')}
-              className={`px-2 py-1 text-[9px] font-black uppercase rounded transition-all ${activeTab === 'documents' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
+              className={`px-1.5 py-0.5 text-[8px] md:text-[9px] font-black uppercase rounded transition-all ${activeTab === 'documents' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
             >
               Docs
             </button>
@@ -232,7 +232,7 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
         </div>
         
         {/* Actions Bar */}
-        <div className="flex flex-wrap gap-1.5 mb-2">
+        <div className="flex flex-wrap gap-1 mb-1">
           <input 
             type="file" 
             ref={fileInputRef} 
@@ -242,80 +242,80 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
           />
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="px-2 py-1 bg-white border border-slate-200 text-slate-600 text-[9px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-1 shadow-sm"
+            className="px-1.5 py-0.5 bg-white border border-slate-200 text-slate-600 text-[8px] md:text-[9px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-0.5 shadow-sm"
           >
-            <FileCode size={10} className="text-primary" /> Import
+            <FileCode size={8} className="text-primary" /> Import
           </button>
           <button 
             onClick={() => setShowNewFolderModal(true)}
-            className="px-2 py-1 bg-white border border-slate-200 text-slate-600 text-[9px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-1 shadow-sm"
+            className="px-1.5 py-0.5 bg-white border border-slate-200 text-slate-600 text-[8px] md:text-[9px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-0.5 shadow-sm"
           >
-            <FolderIcon size={10} className="text-primary" /> New Folder
+            <FolderIcon size={8} className="text-primary" /> New Folder
           </button>
           {selectedQuestionIds.size > 0 && (
-            <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
+            <div className="flex flex-wrap gap-1 w-full md:w-auto">
               <button 
                 onClick={() => onBulkDelete(Array.from(selectedQuestionIds))}
-                className="px-2 py-1 bg-red-500 text-white text-[9px] font-black uppercase rounded hover:bg-red-600 shadow-sm shadow-red-500/20 transition-all flex items-center gap-1"
+                className="px-1.5 py-0.5 bg-red-500 text-white text-[8px] md:text-[9px] font-black uppercase rounded hover:bg-red-600 shadow-sm shadow-red-500/20 transition-all flex items-center gap-0.5"
               >
-                <Trash2 size={10} /> Delete ({selectedQuestionIds.size})
+                <Trash2 size={8} /> Delete ({selectedQuestionIds.size})
               </button>
               <button 
                 onClick={() => setShowBulkAIEditModal(true)}
-                className="px-2 py-1 bg-purple-500 text-white text-[9px] font-black uppercase rounded hover:bg-purple-600 shadow-sm shadow-purple-500/20 transition-all flex items-center gap-1"
+                className="px-1.5 py-0.5 bg-purple-500 text-white text-[8px] md:text-[9px] font-black uppercase rounded hover:bg-purple-600 shadow-sm shadow-purple-500/20 transition-all flex items-center gap-0.5"
               >
-                <Edit2 size={10} /> AI Edit
+                <Edit2 size={8} /> AI Edit
               </button>
               <button 
                 onClick={() => setShowBulkTagModal(true)}
-                className="px-2 py-1 bg-blue-500 text-white text-[9px] font-black uppercase rounded hover:bg-blue-600 shadow-sm shadow-blue-500/20 transition-all flex items-center gap-1"
+                className="px-1.5 py-0.5 bg-blue-500 text-white text-[8px] md:text-[9px] font-black uppercase rounded hover:bg-blue-600 shadow-sm shadow-blue-500/20 transition-all flex items-center gap-0.5"
               >
-                <Tag size={10} /> Bulk Tag
+                <Tag size={8} /> Bulk Tag
               </button>
               <button 
                 onClick={() => setShowCreateSetModal(true)}
-                className="px-2 py-1 bg-emerald-500 text-white text-[9px] font-black uppercase rounded hover:bg-emerald-600 shadow-sm shadow-emerald-500/20 transition-all flex items-center gap-1"
+                className="px-1.5 py-0.5 bg-emerald-500 text-white text-[8px] md:text-[9px] font-black uppercase rounded hover:bg-emerald-600 shadow-sm shadow-emerald-500/20 transition-all flex items-center gap-0.5"
               >
-                <CheckSquare size={10} /> Create Set
+                <CheckSquare size={8} /> Create Set
               </button>
             </div>
           )}
         </div>
 
         {/* Search and Filter */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-1">
           <div className="relative flex-1">
-            <Search size={10} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={8} className="absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-6 pr-2 py-1 bg-slate-50 border border-slate-200 rounded text-[9px] focus:ring-primary focus:border-primary transition-all"
+              className="w-full pl-5 pr-1.5 py-0.5 bg-slate-50 border border-slate-200 rounded text-[8px] md:text-[9px] focus:ring-primary focus:border-primary transition-all"
             />
           </div>
           <button 
             onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-            className="px-2 py-1 bg-white border border-slate-200 text-slate-600 text-[9px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-1 shadow-sm"
+            className="px-1.5 py-0.5 bg-white border border-slate-200 text-slate-600 text-[8px] md:text-[9px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-0.5 shadow-sm"
           >
-            <LayoutGrid size={10} /> {viewMode === 'grid' ? 'List' : 'Grid'}
+            <LayoutGrid size={8} /> {viewMode === 'grid' ? 'List' : 'Grid'}
           </button>
           <div className="relative">
             <button 
               onClick={() => setShowExportMenu(!showExportMenu)}
               disabled={currentQuestions.length === 0}
-              className="px-2 py-1 bg-primary text-white text-[9px] font-black uppercase rounded hover:bg-secondary shadow-sm shadow-primary/20 transition-all flex items-center gap-1 disabled:opacity-50"
+              className="px-1.5 py-0.5 bg-primary text-white text-[8px] md:text-[9px] font-black uppercase rounded hover:bg-secondary shadow-sm shadow-primary/20 transition-all flex items-center gap-0.5 disabled:opacity-50"
             >
-              <Download size={10} /> Export
+              <Download size={8} /> Export
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden">
-                <button onClick={() => navigate('/editor')} className="w-full text-left px-3 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50">Design Editor</button>
-                <button onClick={() => handleExport('pdf')} className="w-full text-left px-3 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50">PDF Document</button>
-                <button onClick={() => handleExport('word')} className="w-full text-left px-3 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50">Word Document</button>
-                <button onClick={() => handleExport('csv')} className="w-full text-left px-3 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50">CSV</button>
-                <button onClick={() => handleExport('json')} className="w-full text-left px-3 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50">Custom JSON</button>
-                <button onClick={() => handleExport('txt')} className="w-full text-left px-3 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50">Plain Text</button>
+              <div className="absolute right-0 top-full mt-0.5 w-32 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden">
+                <button onClick={() => navigate('/editor')} className="w-full text-left px-2 py-1 text-[9px] font-bold text-slate-700 hover:bg-slate-50">Design Editor</button>
+                <button onClick={() => handleExport('pdf')} className="w-full text-left px-2 py-1 text-[9px] font-bold text-slate-700 hover:bg-slate-50">PDF</button>
+                <button onClick={() => handleExport('word')} className="w-full text-left px-2 py-1 text-[9px] font-bold text-slate-700 hover:bg-slate-50">Word</button>
+                <button onClick={() => handleExport('csv')} className="w-full text-left px-2 py-1 text-[9px] font-bold text-slate-700 hover:bg-slate-50">CSV</button>
+                <button onClick={() => handleExport('json')} className="w-full text-left px-2 py-1 text-[9px] font-bold text-slate-700 hover:bg-slate-50">JSON</button>
+                <button onClick={() => handleExport('txt')} className="w-full text-left px-2 py-1 text-[9px] font-bold text-slate-700 hover:bg-slate-50">Text</button>
               </div>
             )}
           </div>

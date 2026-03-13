@@ -975,12 +975,18 @@ const App: React.FC = () => {
   };
 
   const handleImportCSV = (file: File) => {
+    console.log('Importing file:', file.name, file.type, file.size);
     setToast({ message: `Starting import for ${file.name}...`, type: 'success' });
     try {
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         complete: async (results) => {
+          console.log('CSV parse complete:', results);
+          if (results.errors.length > 0) {
+            console.error('CSV parse errors:', results.errors);
+            setToast({ message: `Import finished with ${results.errors.length} errors.`, type: 'warning' });
+          }
           const folderName = file.name.replace(/\.[^/.]+$/, "");
           const newFolder: Folder = {
             id: Date.now().toString(),
