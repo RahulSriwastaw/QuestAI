@@ -55,27 +55,27 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="max-w-3xl mx-auto p-6 space-y-8"
+      className="max-w-3xl mx-auto p-4 space-y-6"
     >
-      <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
-            <Globe size={24} />
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+            <Globe size={20} />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-dark">Current Affairs Generator</h2>
-            <p className="text-slate-500 text-sm mt-1">Generate daily current affairs questions using AI</p>
+            <h2 className="text-xl font-black text-dark">Current Affairs Generator</h2>
+            <p className="text-slate-500 text-[10px] mt-0.5">Generate daily current affairs questions using AI</p>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase">Timeframe</label>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Timeframe</label>
               <select 
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value as any)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               >
                 <option value="Daily">Daily</option>
                 <option value="Monthly">Monthly</option>
@@ -83,18 +83,18 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase">
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-bold text-slate-500 uppercase">
                 {timeframe === 'Daily' ? 'Select Date' : timeframe === 'Monthly' ? 'Select Month' : 'Select Year'}
               </label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                 {timeframe === 'Daily' && (
                   <input 
                     type="date" 
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 )}
                 {timeframe === 'Monthly' && (
@@ -102,7 +102,7 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
                     type="month" 
                     value={month}
                     onChange={(e) => setMonth(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 )}
                 {timeframe === 'Yearly' && (
@@ -112,43 +112,43 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
                     max="2100"
                     value={year}
                     onChange={(e) => setYear(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 )}
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase">Language</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Language</label>
               <select 
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               >
                 <option value="English">English</option>
                 <option value="Hindi">Hindi</option>
               </select>
             </div>
             
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase">Specific Topic (Optional)</label>
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Specific Topic (Optional)</label>
               <div className="relative">
-                <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <BookOpen className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                 <input 
                   type="text" 
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g., Sports, Union Budget..."
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 />
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase">Number of Questions</label>
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-bold text-slate-500 uppercase">Number of Questions</label>
             <input 
               type="range" 
               min="5" 
@@ -156,19 +156,19 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
               step="5"
               value={count}
               onChange={(e) => setCount(parseInt(e.target.value))}
-              className="w-full accent-primary"
+              className="w-full accent-primary h-1.5"
             />
-            <div className="text-right text-sm font-bold text-primary">{count} Questions</div>
+            <div className="text-right text-xs font-bold text-primary">{count} Questions</div>
           </div>
 
           <button 
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="w-full py-4 bg-primary text-white font-black uppercase tracking-wider rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-2.5 bg-primary text-white text-xs font-black uppercase tracking-wider rounded-lg hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {isGenerating ? (
               <>
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
                 Generating...
               </>
             ) : (

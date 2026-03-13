@@ -67,26 +67,26 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
     <div className="fixed inset-0 z-50 flex bg-black bg-opacity-50 backdrop-blur-sm">
       <div className="flex flex-col w-full h-full max-w-7xl mx-auto bg-slate-50 shadow-2xl overflow-hidden">
         
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0 gap-3">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 bg-white border-b border-slate-200 shrink-0 gap-2">
           <div className="flex items-center justify-between w-full md:w-auto">
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              {isDirty && <span className="w-2 h-2 rounded-full bg-orange-500"></span>}
+            <h2 className="text-base font-bold text-slate-800 flex items-center gap-1.5">
+              {isDirty && <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>}
               Edit Q#{question.question_number}
             </h2>
-            <button onClick={onClose} className="md:hidden p-2 text-slate-400 hover:text-slate-600">
-              <X size={20} />
+            <button onClick={onClose} className="md:hidden p-1.5 text-slate-400 hover:text-slate-600">
+              <X size={16} />
             </button>
           </div>
           
-          <div className="flex flex-wrap items-center gap-2 md:border-l md:border-slate-200 md:pl-4">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-500">Status:</span>
+          <div className="flex flex-wrap items-center gap-1.5 md:border-l md:border-slate-200 md:pl-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-medium text-slate-500">Status:</span>
               <button 
                 onClick={() => {
                   setStatus(s => s === 'draft' ? 'published' : 'draft');
                   setIsDirty(true);
                 }}
-                className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors ${
                   status === 'draft' 
                     ? 'bg-yellow-50 text-yellow-700 border-yellow-200' 
                     : 'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -99,7 +99,7 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             <select 
               value={subject} 
               onChange={(e) => { setSubject(e.target.value); setIsDirty(true); }}
-              className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-[10px] border border-slate-200 rounded px-1.5 py-1 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">Subject...</option>
               <option value="physics">Physics</option>
@@ -111,7 +111,7 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             <select 
               value={difficulty} 
               onChange={(e) => { setDifficulty(e.target.value as any); setIsDirty(true); }}
-              className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-[10px] border border-slate-200 rounded px-1.5 py-1 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">Difficulty...</option>
               <option value="easy">Easy</option>
@@ -121,11 +121,11 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             </select>
           </div>
 
-          <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
+          <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3">
             <select 
               value={questionType} 
               onChange={(e) => { setQuestionType(e.target.value); setIsDirty(true); }}
-              className="text-xs border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-[10px] border border-slate-200 rounded px-1.5 py-1 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="mcq_single">MCQ Single</option>
               <option value="mcq_multiple">MCQ Multiple</option>
@@ -138,45 +138,45 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             </select>
           </div>
 
-          <div className="flex items-center gap-3">
-            {!isDirty && <span className="text-xs text-orange-500 font-medium">Make changes to enable save</span>}
+          <div className="flex items-center gap-2">
+            {!isDirty && <span className="text-[10px] text-orange-500 font-medium">Make changes to enable save</span>}
             <button 
               onClick={handleSave}
               disabled={!isDirty || isSaving}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
                 isDirty && !isSaving
                   ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' 
                   : 'bg-slate-100 text-slate-400 cursor-not-allowed'
               }`}
             >
               {isSaving ? (
-                <><div className="w-4 h-4 border-2 border-white border-opacity-30 border-t-white rounded-full animate-spin" /> Saving...</>
+                <><div className="w-3 h-3 border-2 border-white border-opacity-30 border-t-white rounded-full animate-spin" /> Saving...</>
               ) : (
-                <><Save size={16} /> Save Changes</>
+                <><Save size={14} /> Save Changes</>
               )}
             </button>
-            <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-              <X size={20} />
+            <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
+              <X size={16} />
             </button>
           </div>
         </div>
 
-        <div className="flex items-center px-4 bg-white border-b border-slate-200 shrink-0">
+        <div className="flex items-center px-3 bg-white border-b border-slate-200 shrink-0">
           <button 
             onClick={() => setActiveTab('ai')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-b-2 transition-colors ${
               activeTab === 'ai' ? 'border-purple-500 text-purple-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             }`}
           >
-            <Sparkles size={16} /> AI Edit
+            <Sparkles size={14} /> AI Edit
           </button>
           <button 
             onClick={() => setActiveTab('pdf')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-b-2 transition-colors ${
               activeTab === 'pdf' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             }`}
           >
-            <FileText size={16} /> Page {question.page_number}
+            <FileText size={14} /> Page {question.page_number}
           </button>
         </div>
 
@@ -185,50 +185,50 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
           <div className="w-1/2 border-r border-slate-200 bg-slate-100 flex flex-col overflow-hidden">
             {activeTab === 'pdf' ? (
               <>
-                <div className="flex items-center justify-between px-3 py-2 bg-white border-b border-slate-200 shrink-0">
-                  <div className="text-xs font-medium text-slate-500 flex items-center gap-2">
-                    <ChevronLeft size={14} /> Viewing page {question.page_number} of source
+                <div className="flex items-center justify-between px-2 py-1.5 bg-white border-b border-slate-200 shrink-0">
+                  <div className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5">
+                    <ChevronLeft size={12} /> Viewing page {question.page_number} of source
                   </div>
-                  <div className="flex items-center gap-1">
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><ZoomOut size={14} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><ZoomIn size={14} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Maximize size={14} /></button>
-                    <div className="w-px h-4 bg-slate-200 mx-1"></div>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Download size={14} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Printer size={14} /></button>
+                  <div className="flex items-center gap-0.5">
+                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><ZoomOut size={12} /></button>
+                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><ZoomIn size={12} /></button>
+                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Maximize size={12} /></button>
+                    <div className="w-px h-3 bg-slate-200 mx-0.5"></div>
+                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Download size={12} /></button>
+                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Printer size={12} /></button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto p-4 flex items-center justify-center relative">
-                  <div className="w-full max-w-lg aspect-square bg-white shadow-md relative">
-                    <div className="absolute inset-0 flex items-center justify-center text-slate-300 font-medium">
+                <div className="flex-1 overflow-auto p-3 flex items-center justify-center relative">
+                  <div className="w-full max-w-lg aspect-square bg-white shadow-sm relative">
+                    <div className="absolute inset-0 flex items-center justify-center text-slate-300 font-medium text-xs">
                       {pdfUrl ? "PDF Viewer Loading..." : "No PDF Source Available"}
                     </div>
-                    <div className="absolute top-[25%] left-10 right-10 h-32 bg-yellow-400 bg-opacity-20 border-2 border-yellow-400 border-opacity-50 rounded pointer-events-none"></div>
+                    <div className="absolute top-[25%] left-10 right-10 h-24 bg-yellow-400 bg-opacity-20 border-2 border-yellow-400 border-opacity-50 rounded pointer-events-none"></div>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="p-6 flex flex-col h-full">
-                <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                  <Sparkles size={16} className="text-purple-500" /> AI Assistant
+              <div className="p-4 flex flex-col h-full">
+                <h3 className="text-xs font-bold text-slate-800 mb-3 flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-purple-500" /> AI Assistant
                 </h3>
-                <div className="flex-1 bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col">
-                  <div className="flex-1 overflow-auto space-y-4">
-                    <div className="bg-purple-50 text-purple-800 p-3 rounded-lg text-sm">
+                <div className="flex-1 bg-white rounded-lg border border-slate-200 p-3 shadow-sm flex flex-col">
+                  <div className="flex-1 overflow-auto space-y-3">
+                    <div className="bg-purple-50 text-purple-800 p-2.5 rounded-md text-xs">
                       I can help you edit this question. What would you like to do?
                     </div>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-slate-100">
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <button className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-md transition-colors">Rephrase</button>
-                      <button className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-md transition-colors">Fix Grammar</button>
-                      <button className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-md transition-colors">Translate</button>
-                      <button className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-md transition-colors">Detect Type</button>
+                  <div className="mt-3 pt-3 border-t border-slate-100">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      <button className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium rounded transition-colors">Rephrase</button>
+                      <button className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium rounded transition-colors">Fix Grammar</button>
+                      <button className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium rounded transition-colors">Translate</button>
+                      <button className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium rounded transition-colors">Detect Type</button>
                     </div>
                     <input 
                       type="text" 
                       placeholder="Ask AI to edit this question..." 
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
                     />
                   </div>
                 </div>
@@ -236,46 +236,46 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             )}
           </div>
 
-          <div className="w-1/2 overflow-auto bg-slate-50 p-6">
-            <div className="max-w-2xl mx-auto space-y-6">
+          <div className="w-1/2 overflow-auto bg-slate-50 p-4">
+            <div className="max-w-2xl mx-auto space-y-4">
               
-              <button className="w-full py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-medium text-sm hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all">
+              <button className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium text-xs hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all">
                 + Add Passage/Instruction
               </button>
 
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-4 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-3 py-1.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
                     QUESTION
                   </span>
-                  <div className="flex items-center gap-1">
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Bold size={14} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Italic size={14} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Underline size={14} /></button>
-                    <div className="w-px h-4 bg-slate-200 mx-1"></div>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Superscript size={14} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Subscript size={14} /></button>
-                    <div className="w-px h-4 bg-slate-200 mx-1"></div>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Sigma size={14} /></button>
+                  <div className="flex items-center gap-0.5">
+                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Bold size={12} /></button>
+                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Italic size={12} /></button>
+                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Underline size={12} /></button>
+                    <div className="w-px h-3 bg-slate-200 mx-0.5"></div>
+                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Superscript size={12} /></button>
+                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Subscript size={12} /></button>
+                    <div className="w-px h-3 bg-slate-200 mx-0.5"></div>
+                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Sigma size={12} /></button>
                   </div>
                 </div>
                 <textarea
                   value={editedQuestion.question_text}
                   onChange={(e) => handleChange('question_text', e.target.value)}
-                  className="w-full p-4 min-h-[120px] text-sm text-slate-700 focus:outline-none resize-y"
+                  className="w-full p-3 min-h-[100px] text-xs text-slate-700 focus:outline-none resize-y"
                   placeholder="Enter question text here..."
                 />
-                <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 text-[10px] text-slate-400 text-right">
+                <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-100 text-[9px] text-slate-400 text-right">
                   {editedQuestion.question_text.length} characters
                 </div>
               </div>
 
               {editedQuestion.diagram_url ? (
-                <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase">Attached Image</span>
-                    <div className="flex gap-2">
-                      <label className="text-xs font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
+                <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
+                  <div className="flex items-start justify-between mb-1.5">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase">Attached Image</span>
+                    <div className="flex gap-1.5">
+                      <label className="text-[10px] font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
                         Edit Image
                         <input 
                           type="file" 
@@ -286,14 +286,14 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                       </label>
                       <button 
                         onClick={() => handleChange('diagram_url', undefined)}
-                        className="text-xs font-medium text-red-600 hover:text-red-700"
+                        className="text-[10px] font-medium text-red-600 hover:text-red-700"
                       >
                         Remove
                       </button>
                     </div>
                   </div>
-                  <div className="bg-slate-100 rounded-lg p-2 flex justify-center">
-                    <img src={editedQuestion.diagram_url} alt="Question Diagram" className="max-h-40 object-contain rounded" />
+                  <div className="bg-slate-100 rounded-md p-1.5 flex justify-center">
+                    <img src={editedQuestion.diagram_url} alt="Question Diagram" className="max-h-32 object-contain rounded" />
                   </div>
                   <input 
                     type="text" 
@@ -304,8 +304,8 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                   />
                 </div>
               ) : (
-                <label className="w-full py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-medium text-sm hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer">
-                  <ImageIcon size={24} className="text-slate-400" />
+                <label className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium text-xs hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer">
+                  <ImageIcon size={20} className="text-slate-400" />
                   Add Image (Optional)
                   <input 
                     type="file" 
@@ -316,22 +316,22 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                 </label>
               )}
 
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
                     OPTIONS
                   </span>
                 </div>
-                <div className="p-4 space-y-3">
+                <div className="p-3 space-y-2">
                   {['A', 'B', 'C', 'D'].map((label) => (
-                    <div key={label} className="flex items-start gap-3 group">
-                      <div className="mt-2 text-slate-300 cursor-grab hover:text-slate-500"><GripVertical size={16} /></div>
-                      <div className="mt-2 font-bold text-slate-500 w-6">({label})</div>
-                      <div className="flex-1 relative flex flex-col gap-2">
+                    <div key={label} className="flex items-start gap-2 group">
+                      <div className="mt-1.5 text-slate-300 cursor-grab hover:text-slate-500"><GripVertical size={14} /></div>
+                      <div className="mt-1.5 font-bold text-slate-500 w-5 text-xs">({label})</div>
+                      <div className="flex-1 relative flex flex-col gap-1.5">
                         <textarea
                           value={(editedQuestion.options as any)[label] || ''}
                           onChange={(e) => handleOptionChange(label, e.target.value)}
-                          className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 resize-none min-h-[40px]"
+                          className="w-full p-1.5 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 resize-none min-h-[32px]"
                           rows={1}
                         />
                         {(editedQuestion.options as any)[`${label}_diagram_url`] ? (
@@ -339,18 +339,18 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                             <img 
                               src={(editedQuestion.options as any)[`${label}_diagram_url`]} 
                               alt={`Option ${label}`} 
-                              className="max-h-24 object-contain rounded border border-slate-200" 
+                              className="max-h-20 object-contain rounded border border-slate-200" 
                             />
                             <button 
                               onClick={() => handleOptionChange(`${label}_diagram_url`, undefined as any)}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-sm"
+                              className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 shadow-sm"
                             >
-                              <X size={12} />
+                              <X size={10} />
                             </button>
                           </div>
                         ) : (
-                          <label className="text-xs text-blue-500 hover:text-blue-600 cursor-pointer flex items-center gap-1 w-max">
-                            <ImageIcon size={14} /> Add Image
+                          <label className="text-[10px] text-blue-500 hover:text-blue-600 cursor-pointer flex items-center gap-1 w-max">
+                            <ImageIcon size={12} /> Add Image
                             <input 
                               type="file" 
                               accept="image/*" 
@@ -360,45 +360,45 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                           </label>
                         )}
                       </div>
-                      <div className="flex items-center gap-3 mt-2">
-                        <label className="flex items-center gap-1.5 cursor-pointer">
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <label className="flex items-center gap-1 cursor-pointer">
                           <input 
                             type="radio" 
                             name="correct_answer" 
                             checked={editedQuestion.answer === label}
                             onChange={() => handleChange('answer', label)}
-                            className="w-4 h-4 text-green-500 focus:ring-green-500 border-slate-300"
+                            className="w-3.5 h-3.5 text-green-500 focus:ring-green-500 border-slate-300"
                           />
-                          <span className="text-xs font-medium text-slate-600">Correct</span>
+                          <span className="text-[10px] font-medium text-slate-600">Correct</span>
                         </label>
                         <button className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                          <Trash2 size={16} />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
                   ))}
-                  <button className="text-sm font-medium text-blue-600 hover:text-blue-700 mt-2 ml-10">
+                  <button className="text-xs font-medium text-blue-600 hover:text-blue-700 mt-1 ml-8">
                     + Add Option
                   </button>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                 <button 
                   onClick={() => setShowExplanation(!showExplanation)}
-                  className="w-full px-4 py-3 bg-slate-50 flex items-center justify-between hover:bg-slate-100 transition-colors"
+                  className="w-full px-3 py-2 bg-slate-50 flex items-center justify-between hover:bg-slate-100 transition-colors"
                 >
-                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
                     Solution and Explanation (Optional)
                   </span>
-                  <ChevronRight size={16} className={`text-slate-400 transition-transform ${showExplanation ? 'rotate-90' : ''}`} />
+                  <ChevronRight size={14} className={`text-slate-400 transition-transform ${showExplanation ? 'rotate-90' : ''}`} />
                 </button>
                 {showExplanation && (
-                  <div className="p-4 border-t border-slate-200">
+                  <div className="p-3 border-t border-slate-200">
                     <textarea
                       value={editedQuestion.solution_eng || ''}
                       onChange={(e) => handleChange('solution_eng', e.target.value)}
-                      className="w-full p-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400 min-h-[100px]"
+                      className="w-full p-2 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400 min-h-[80px]"
                       placeholder="Add step-by-step solution here..."
                     />
                   </div>
@@ -409,15 +409,15 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-6 py-3 bg-white border-t border-slate-200 shrink-0">
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-            <ChevronLeft size={16} /> Previous
+        <div className="flex items-center justify-between px-4 py-2 bg-white border-t border-slate-200 shrink-0">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
+            <ChevronLeft size={14} /> Previous
           </button>
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
             Question {question.question_number} of 20
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-            Next <ChevronRight size={16} />
+          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
+            Next <ChevronRight size={14} />
           </button>
         </div>
       </div>

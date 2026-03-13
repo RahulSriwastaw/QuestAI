@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import Papa from 'papaparse';
+import * as Papa from 'papaparse';
 import { Question, ProcessStep, PageData, DocumentData, Folder, BankQuestion, QuestionSet } from './types';
 import FileUpload from './components/FileUpload';
 import ProcessStatus from './components/ProcessStatus';
@@ -185,6 +185,7 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [showLanding, setShowLanding] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const exportMenuRef = useRef<HTMLDivElement>(null);
@@ -974,51 +975,85 @@ const App: React.FC = () => {
   };
 
   const handleImportCSV = (file: File) => {
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const folderName = file.name.replace(/\.[^/.]+$/, "");
-        const newFolder: Folder = {
-          id: Date.now().toString(),
-          name: folderName,
-          parentId: null,
-          createdAt: Date.now()
-        };
+    setToast({ message: `Starting import for ${file.name}...`, type: 'success' });
+    try {
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: async (results) => {
+          const folderName = file.name.replace(/\.[^/.]+$/, "");
+          const newFolder: Folder = {
+            id: Date.now().toString(),
+            name: folderName,
+            parentId: null,
+            createdAt: Date.now()
+          };
 
-        const importedQuestions: BankQuestion[] = results.data.map((row: any) => ({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-          folderId: newFolder.id,
-          savedAt: Date.now(),
-          question_number: row.question_number || 0,
-          question_text: row.question_text || '',
-          options: {
-            A: row.A || '',
-            B: row.B || '',
-            C: row.C || '',
-            D: row.D || ''
-          },
-          answer: row.answer || '',
-          solution_hin: row.solution_hin || '',
-          solution_eng: row.solution_eng || '',
-          has_diagram: !!row.diagram_url,
-          diagram_url: row.diagram_url || null,
-          page_number: row.page_number || 1,
-          diagram_bbox: undefined,
-          diagram_alt_text: row.diagram_alt_text || null,
-          question_hin: row.question_hin || '',
-          question_eng: row.question_eng || ''
-        }));
-        
-        setFolders([...folders, newFolder]);
-        setBankQuestions([...bankQuestions, ...importedQuestions]);
-        setToast({ message: `Successfully imported ${importedQuestions.length} questions into folder "${folderName}"!`, type: 'success' });
-      },
-      error: (err) => {
-        console.error('Error parsing CSV:', err);
-        setToast({ message: 'Failed to import CSV. Please check the file format.', type: 'error' });
-      }
-    });
+          const importedQuestions: BankQuestion[] = results.data.map((row: any) => ({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            folderId: newFolder.id,
+            savedAt: Date.now(),
+            question_number: row.question_number || 0,
+            question_text: row.question_text || '',
+            options: {
+              A: row.A || '',
+              B: row.B || '',
+              C: row.C || '',
+              D: row.D || ''
+            },
+            answer: row.answer || '',
+            solution_hin: row.solution_hin || '',
+            solution_eng: row.solution_eng || '',
+            has_diagram: !!row.diagram_url,
+            diagram_url: row.diagram_url || null,
+            page_number: row.page_number || 1,
+            diagram_bbox: undefined,
+            diagram_alt_text: row.diagram_alt_text || null,
+            question_hin: row.question_hin || '',
+            question_eng: row.question_eng || ''
+          }));
+          
+          setFolders(prev => [...prev, newFolder]);
+          setBankQuestions(prev => [...prev, ...importedQuestions]);
+          setToast({ message: `Successfully imported ${importedQuestions.length} questions into folder "${folderName}"!`, type: 'success' });
+
+          try {
+            const { error } = await supabase.from('bank_questions').insert(
+              importedQuestions.map(q => ({
+                id: q.id,
+                folder_id: q.folderId,
+                saved_at: q.savedAt,
+                question_data: {
+                  question_number: q.question_number,
+                  question_text: q.question_text,
+                  options: q.options,
+                  answer: q.answer,
+                  solution_hin: q.solution_hin,
+                  solution_eng: q.solution_eng,
+                  diagram_url: q.diagram_url,
+                  page_number: q.page_number,
+                  has_diagram: q.has_diagram,
+                  question_hin: q.question_hin,
+                  question_eng: q.question_eng
+                }
+              }))
+            );
+
+            if (error) throw error;
+          } catch (err: any) {
+            console.error('Error saving imported questions to Supabase:', err);
+            // We already updated local state, so it works for the user session
+          }
+        },
+        error: (err) => {
+          console.error('Error parsing CSV:', err);
+          setToast({ message: 'Failed to import CSV. Please check the file format.', type: 'error' });
+        }
+      });
+    } catch (err: any) {
+      console.error('Error calling Papa.parse:', err);
+      setToast({ message: `Error starting import: ${err.message}`, type: 'error' });
+    }
   };
 
   const handleCreateSet = (name: string, password: string | undefined, questionIds: string[]) => {
@@ -1619,37 +1654,47 @@ const App: React.FC = () => {
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-3">
-                          <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1">
-                            <button className="p-2 rounded-lg bg-white text-primary shadow-sm"><LayoutGrid size={18} /></button>
-                            <button className="p-2 rounded-lg text-slate-400 hover:bg-white hover:text-slate-600 transition-all"><List size={18} /></button>
+                          <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1">
+                            <button 
+                              onClick={() => setViewMode('grid')}
+                              className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:bg-white hover:text-slate-600'}`}
+                            >
+                              <LayoutGrid size={16} />
+                            </button>
+                            <button 
+                              onClick={() => setViewMode('list')}
+                              className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:bg-white hover:text-slate-600'}`}
+                            >
+                              <List size={16} />
+                            </button>
                           </div>
-                          <button className="flex items-center gap-2 px-6 py-3 bg-primary text-white text-[11px] font-black uppercase rounded-xl hover:bg-secondary shadow-lg shadow-primary/20 transition-all active:scale-95">
-                            <Plus size={16} /> Add Question
+                          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-[10px] font-black uppercase rounded-lg hover:bg-secondary shadow-md shadow-primary/20 transition-all active:scale-95">
+                            <Plus size={14} /> Add Question
                           </button>
-                          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-[11px] font-black uppercase text-slate-600 rounded-xl hover:bg-slate-50 transition-all">
-                            <Tag size={16} className="text-orange-400" /> Bulk Tag
+                          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-[10px] font-black uppercase text-slate-600 rounded-lg hover:bg-slate-50 transition-all">
+                            <Tag size={14} className="text-orange-400" /> Bulk Tag
                           </button>
-                          <button className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-[11px] font-black uppercase text-slate-600 rounded-xl hover:bg-slate-50 transition-all">
-                            <Layers size={16} className="text-red-400" /> Bulk Edit
+                          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-[10px] font-black uppercase text-slate-600 rounded-lg hover:bg-slate-50 transition-all">
+                            <Layers size={14} className="text-red-400" /> Bulk Edit
                           </button>
                         </div>
                       </div>
 
                       {/* Search Bar */}
-                      <div className="flex gap-3">
+                      <div className="flex gap-2">
                         <div className="relative flex-1 group">
-                          <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
+                          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
                           <input 
                             type="text" 
                             placeholder="Search questions by text, tag, or difficulty..." 
-                            className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all outline-none"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white transition-all outline-none"
                           />
                         </div>
-                        <button className="px-10 py-4 bg-dark text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-slate-800 transition-all shadow-xl">Search</button>
+                        <button className="px-6 py-2.5 bg-dark text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-800 transition-all shadow-md">Search</button>
                       </div>
 
                       {/* Questions Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                      <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "space-y-4"}>
                         {questions.map((q, i) => (
                           <motion.div
                             key={q.id}
@@ -1657,7 +1702,7 @@ const App: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.05 }}
                           >
-                            <QuestionCard question={q} onEdit={setEditingQuestion} />
+                            <QuestionCard question={q} onEdit={setEditingQuestion} viewMode={viewMode} />
                           </motion.div>
                         ))}
                       </div>
