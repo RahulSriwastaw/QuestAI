@@ -18,19 +18,21 @@ interface SetCreatorStore {
     mode: 'prev_year' | 'prev_year_related' | 'all';
     search_text: string;
   };
+  filtered_questions: Question[];
   set_questions: Question[];
   visibility: 'private' | 'org_only' | 'public';
   
   setStep: (step: 1 | 2 | 3 | 'success') => void;
   setField: (field: string, value: any) => void;
   setFilter: (filter: string, value: any) => void;
+  fetchQuestions: () => Promise<void>;
   addToSet: (question: Question) => void;
   removeFromSet: (id: string) => void;
   reorderSet: (questions: Question[]) => void;
   reset: () => void;
 }
 
-export const useSetCreatorStore = create<SetCreatorStore>((set) => ({
+export const useSetCreatorStore = create<SetCreatorStore>((set, get) => ({
   step: 1,
   name: '',
   subject_id: '',
@@ -47,6 +49,7 @@ export const useSetCreatorStore = create<SetCreatorStore>((set) => ({
     mode: 'prev_year',
     search_text: '',
   },
+  filtered_questions: [],
   set_questions: [],
   visibility: 'private',
 
@@ -55,6 +58,15 @@ export const useSetCreatorStore = create<SetCreatorStore>((set) => ({
   setFilter: (filter, value) => set((state) => ({
     filters: { ...state.filters, [filter]: value }
   })),
+  fetchQuestions: async () => {
+    // Mock API call
+    console.log('Fetching with filters:', get().filters);
+    const mockQuestions: Question[] = [
+      { id: 'q1', question_number: 1, question_text: 'If α and β are roots of x²-5x+6=0, find α²+β²', options: { A: '25', B: '13', C: '11', D: '12' }, answer: 'B', difficulty: 'easy', type: 'mcq' },
+      { id: 'q2', question_number: 2, question_text: 'Solve: 2x²+5x-3=0', options: { A: '0.5', B: '-3', C: 'Both A&B', D: 'None' }, answer: 'C', difficulty: 'medium', type: 'mcq' },
+    ];
+    set({ filtered_questions: mockQuestions });
+  },
   addToSet: (question) => set((state) => ({
     set_questions: [...state.set_questions, question]
   })),
