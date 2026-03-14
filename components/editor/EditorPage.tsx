@@ -121,7 +121,7 @@ export default function EditorPage() {
 
   useEffect(() => {
     // Connect to the WebSocket server
-    const socket = io();
+    const socket = io(window.location.origin);
     socketRef.current = socket;
 
     socket.on('connect', () => {
@@ -573,6 +573,33 @@ export default function EditorPage() {
     setSelectedElementIds(prev => prev.filter(selectedId => selectedId !== id));
   };
 
+  const handleDuplicateElement = () => {
+    const elementsToDuplicate = selectedElements;
+    if (elementsToDuplicate.length === 0) return;
+
+    const newElements = elementsToDuplicate.map(el => ({
+      ...JSON.parse(JSON.stringify(el)),
+      id: `${el.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      x: el.x + 20,
+      y: el.y + 20,
+      zIndex: el.zIndex + 1
+    }));
+
+    handleAddElements(newElements);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && (e.target as HTMLElement).tagName !== 'INPUT' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+        if (selectedElementIds.length > 0) {
+          selectedElementIds.forEach(id => handleDeleteElement(id));
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedElementIds]);
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-100 font-sans text-slate-800">
       <Topbar 
@@ -691,6 +718,7 @@ export default function EditorPage() {
           onUpdateElement={handleUpdateElement}
           onUpdateElements={handleUpdateElements}
           onDeleteElement={handleDeleteElement}
+          onDuplicateElement={handleDuplicateElement}
           onGroup={handleGroup}
           onUngroup={handleUngroup}
           pageBackground={currentPage.background}

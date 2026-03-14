@@ -23,7 +23,7 @@ const ImageNode = ({ element, isSelected, onSelect, onChange, showGrid }: {
   onChange: (newAttrs: any) => void;
   showGrid: boolean;
 }) => {
-  const [image] = useImage(element.src);
+  const [image] = useImage(element.src, 'anonymous');
   const shapeRef = useRef<any>(null);
 
   return (
@@ -32,6 +32,7 @@ const ImageNode = ({ element, isSelected, onSelect, onChange, showGrid }: {
       name="element"
       id={element.id}
       image={image}
+      crossOrigin="anonymous"
       x={element.x}
       y={element.y}
       width={element.width}
@@ -89,7 +90,7 @@ const QuestionBlockNode = ({ element, isSelected, onSelect, onChange, showGrid }
   showGrid: boolean;
 }) => {
   const shapeRef = useRef<any>(null);
-  const [diagram] = useImage(element.diagramUrl || '');
+  const [diagram] = useImage(element.diagramUrl || '', 'anonymous');
 
   return (
     <Group
@@ -140,6 +141,7 @@ const QuestionBlockNode = ({ element, isSelected, onSelect, onChange, showGrid }
       {element.diagramUrl && diagram && (
         <KonvaImage
           image={diagram}
+          crossOrigin="anonymous"
           x={15}
           y={60}
           width={element.width - 30}

@@ -5,6 +5,10 @@ export interface Question {
   question_text: string;
   question_hin?: string;
   question_eng?: string;
+  subject?: string;
+  chapter?: string;
+  exam?: string;
+  year?: string;
   has_diagram: boolean;
   diagram_description?: string;
   options: {
@@ -20,18 +24,6 @@ export interface Question {
     B_eng?: string;
     C_eng?: string;
     D_eng?: string;
-    A_diagram_bbox?: [number, number, number, number];
-    B_diagram_bbox?: [number, number, number, number];
-    C_diagram_bbox?: [number, number, number, number];
-    D_diagram_bbox?: [number, number, number, number];
-    A_diagram_url?: string;
-    B_diagram_url?: string;
-    C_diagram_url?: string;
-    D_diagram_url?: string;
-    A_diagram_alt_text?: string;
-    B_diagram_alt_text?: string;
-    C_diagram_alt_text?: string;
-    D_diagram_alt_text?: string;
   };
   page_number: number;
   diagram_bbox?: [number, number, number, number]; // [ymin, xmin, ymax, xmax]

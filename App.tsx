@@ -88,6 +88,7 @@ const App: React.FC = () => {
   const [message, setMessage] = useState('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
 
   const handleUpdateQuestion = (updatedQuestion: Question) => {
     setQuestions(questions.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
@@ -436,7 +437,7 @@ const App: React.FC = () => {
           const math = part.slice(1, -1);
           const span = document.createElement('span');
           try {
-            window.katex.render(math, span, { throwOnError: false, displayMode: false });
+            window.katex.render(math, span, { throwOnError: false, displayMode: false, strict: false });
             container.appendChild(span);
           } catch (e) {
             container.appendChild(document.createTextNode(part));
@@ -996,56 +997,61 @@ const App: React.FC = () => {
           };
 
           const importedQuestions: BankQuestion[] = results.data.map((row: any) => ({
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            id: row.record_id || Date.now().toString() + Math.random().toString(36).substr(2, 9),
             folderId: newFolder.id,
             savedAt: Date.now(),
-            question_number: row.question_number || 0,
-            question_text: row.question_text || '',
+            question_number: parseInt(row.question_unique_id) || 0,
+            question_text: row.question_eng || row.question_hin || '',
+            question_hin: row.question_hin || '',
+            question_eng: row.question_eng || '',
+            subject: row.subject || '',
+            chapter: row.chapter || '',
+            exam: row.exam || '',
+            year: row.year || '',
             options: {
-              A: row.A || '',
-              B: row.B || '',
-              C: row.C || '',
-              D: row.D || ''
+              A: row.option1_eng || row.option1_hin || '',
+              B: row.option2_eng || row.option2_hin || '',
+              C: row.option3_eng || row.option3_hin || '',
+              D: row.option4_eng || row.option4_hin || ''
             },
             answer: row.answer || '',
             solution_hin: row.solution_hin || '',
             solution_eng: row.solution_eng || '',
-            has_diagram: !!row.diagram_url,
-            diagram_url: row.diagram_url || null,
-            page_number: row.page_number || 1,
-            diagram_bbox: undefined,
-            diagram_alt_text: row.diagram_alt_text || null,
-            question_hin: row.question_hin || '',
-            question_eng: row.question_eng || ''
+            has_diagram: false,
+            page_number: 1
           }));
           
           setFolders(prev => [...prev, newFolder]);
           setBankQuestions(prev => [...prev, ...importedQuestions]);
+          setCurrentFolderId(newFolder.id);
           setToast({ message: `Successfully imported ${importedQuestions.length} questions into folder "${folderName}"!`, type: 'success' });
 
           try {
-            const { error } = await supabase.from('bank_questions').insert(
-              importedQuestions.map(q => ({
-                id: q.id,
-                folder_id: q.folderId,
-                saved_at: q.savedAt,
-                question_data: {
-                  question_number: q.question_number,
-                  question_text: q.question_text,
-                  options: q.options,
-                  answer: q.answer,
-                  solution_hin: q.solution_hin,
-                  solution_eng: q.solution_eng,
-                  diagram_url: q.diagram_url,
-                  page_number: q.page_number,
-                  has_diagram: q.has_diagram,
-                  question_hin: q.question_hin,
-                  question_eng: q.question_eng
-                }
-              }))
-            );
-
-            if (error) throw error;
+            const BATCH_SIZE = 50;
+            for (let i = 0; i < importedQuestions.length; i += BATCH_SIZE) {
+              const batch = importedQuestions.slice(i, i + BATCH_SIZE);
+              const { error } = await supabase.from('bank_questions').insert(
+                batch.map(q => ({
+                  id: q.id,
+                  folder_id: q.folderId,
+                  saved_at: q.savedAt,
+                  question_data: {
+                    question_number: q.question_number,
+                    question_text: q.question_text,
+                    options: q.options,
+                    answer: q.answer,
+                    solution_hin: q.solution_hin,
+                    solution_eng: q.solution_eng,
+                    diagram_url: q.diagram_url,
+                    page_number: q.page_number,
+                    has_diagram: q.has_diagram,
+                    question_hin: q.question_hin,
+                    question_eng: q.question_eng
+                  }
+                }))
+              );
+              if (error) throw error;
+            }
           } catch (err: any) {
             console.error('Error saving imported questions to Supabase:', err);
             // We already updated local state, so it works for the user session
@@ -1387,6 +1393,8 @@ const App: React.FC = () => {
                 <QuestionBank 
                   questions={bankQuestions}
                   folders={folders}
+                  currentFolderId={currentFolderId}
+                  onFolderChange={setCurrentFolderId}
                   onAddFolder={handleAddFolder}
                   onDeleteFolder={handleDeleteFolder}
                   onDeleteQuestion={handleDeleteBankQuestion}

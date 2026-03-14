@@ -20,7 +20,8 @@ import {
   Square,
   Lock,
   LayoutGrid,
-  Tag
+  Tag,
+  UploadCloud
 } from 'lucide-react';
 import QuestionCard from './QuestionCard';
 import BulkAIEditModal from './BulkAIEditModal';
@@ -31,6 +32,8 @@ import { useNavigate } from 'react-router-dom';
 interface QuestionBankProps {
   questions: BankQuestion[];
   folders: Folder[];
+  currentFolderId: string | null;
+  onFolderChange: (id: string | null) => void;
   onAddFolder: (name: string, parentId: string | null) => void;
   onDeleteFolder: (id: string) => void;
   onDeleteQuestion: (id: string) => void;
@@ -49,6 +52,8 @@ interface QuestionBankProps {
 const QuestionBank: React.FC<QuestionBankProps> = ({ 
   questions, 
   folders, 
+  currentFolderId,
+  onFolderChange,
   onAddFolder, 
   onDeleteFolder,
   onDeleteQuestion,
@@ -64,7 +69,6 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   onBulkEdit
 }) => {
   const navigate = useNavigate();
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [folderSearchQuery, setFolderSearchQuery] = useState('');
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
@@ -80,14 +84,22 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null);
   
   const [activeTab, setActiveTab] = useState<'bulk' | 'documents'>('bulk');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('grid');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'draft'>('all');
   const [refinementTab, setRefinementTab] = useState<'pending' | 'final'>('pending');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   
   const safeFolders = folders || [];
   const safeQuestions = questions || [];
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      onImportCSV(e.target.files[0]);
+      e.target.value = ''; // Reset input
+    }
+  };
 
   const hasFoldersInCurrentDir = safeFolders.some(f => f && f.parentId === currentFolderId);
   const currentFolders = safeFolders.filter(f => 
@@ -111,6 +123,37 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   const paginatedQuestions = allQuestions.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
+  );
+
+  const renderTableView = () => (
+    <div className="overflow-x-auto bg-white rounded-2xl border border-slate-200">
+      <table className="w-full text-xs text-left">
+        <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th className="px-4 py-3">ID</th>
+            <th className="px-4 py-3">Question</th>
+            <th className="px-4 py-3">Subject</th>
+            <th className="px-4 py-3">Chapter</th>
+            <th className="px-4 py-3">Exam</th>
+            <th className="px-4 py-3">Year</th>
+            <th className="px-4 py-3">Answer</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {paginatedQuestions.map((q) => (
+            <tr key={q.id} className="hover:bg-slate-50">
+              <td className="px-4 py-3 font-mono text-slate-500">{q.question_number}</td>
+              <td className="px-4 py-3 font-medium text-dark truncate max-w-[200px]">{q.question_text}</td>
+              <td className="px-4 py-3 text-slate-600">{q.subject}</td>
+              <td className="px-4 py-3 text-slate-600">{q.chapter}</td>
+              <td className="px-4 py-3 text-slate-600">{q.exam}</td>
+              <td className="px-4 py-3 text-slate-600">{q.year}</td>
+              <td className="px-4 py-3 font-bold text-primary">{q.answer}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 
   const currentQuestions = safeQuestions.filter(q => {
@@ -182,15 +225,6 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
       }
     }
     return [...breadcrumbs, ...path];
-  };
-
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      onImportCSV(e.target.files[0]);
-      e.target.value = ''; // Reset input
-    }
   };
 
   const handleExport = (type: 'pdf' | 'word' | 'json' | 'txt' | 'csv') => {
@@ -295,10 +329,17 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
             />
           </div>
           <button 
-            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+            onClick={() => fileInputRef.current?.click()}
             className="px-2 py-1.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-1 shadow-sm"
           >
-            <LayoutGrid size={12} /> {viewMode === 'grid' ? 'List' : 'Grid'}
+            <UploadCloud size={12} /> Import CSV
+          </button>
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".csv" />
+          <button 
+            onClick={() => setViewMode(prev => prev === 'grid' ? 'list' : prev === 'list' ? 'table' : 'grid')}
+            className="px-2 py-1.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-1 shadow-sm"
+          >
+            <LayoutGrid size={12} /> {viewMode === 'grid' ? 'List' : viewMode === 'list' ? 'Table' : 'Grid'}
           </button>
           <div className="relative">
             <button 
@@ -327,7 +368,7 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
         {getBreadcrumbs().map((crumb, index, array) => (
           <React.Fragment key={crumb.id || 'root'}>
             <button 
-              onClick={() => setCurrentFolderId(crumb.id)}
+              onClick={() => onFolderChange(crumb.id)}
               className={`text-[10px] font-bold whitespace-nowrap transition-colors ${
                 index === array.length - 1 ? 'text-dark' : 'text-slate-400 hover:text-primary'
               }`}
@@ -400,23 +441,25 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
                   </div>
                   <motion.div 
                     layout
-                    className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : "space-y-2"}
+                    className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : viewMode === 'list' ? "space-y-2" : ""}
                   >
-                    <AnimatePresence mode="popLayout">
-                      {paginatedQuestions.map(q => (
-                        <QuestionCard 
-                          key={q.id} 
-                          question={q} 
-                          selected={selectedQuestionIds.has(q.id)}
-                          viewMode={viewMode}
-                          onSelect={toggleQuestionSelection}
-                          onEdit={setEditingQuestion}
-                          onDelete={() => setQuestionToDelete(q.id)}
-                          onToggleStatus={(status) => onUpdateQuestion && onUpdateQuestion({ ...q, status })}
-                          onToggleRefinement={(refinementStatus) => onUpdateQuestion && onUpdateQuestion({ ...q, refinementStatus })}
-                        />
-                      ))}
-                    </AnimatePresence>
+                    {viewMode === 'table' ? renderTableView() : (
+                      <AnimatePresence mode="popLayout">
+                        {paginatedQuestions.map(q => (
+                          <QuestionCard 
+                            key={q.id} 
+                            question={q} 
+                            selected={selectedQuestionIds.has(q.id)}
+                            viewMode={viewMode}
+                            onSelect={toggleQuestionSelection}
+                            onEdit={setEditingQuestion}
+                            onDelete={() => setQuestionToDelete(q.id)}
+                            onToggleStatus={(status) => onUpdateQuestion && onUpdateQuestion({ ...q, status })}
+                            onToggleRefinement={(refinementStatus) => onUpdateQuestion && onUpdateQuestion({ ...q, refinementStatus })}
+                          />
+                        ))}
+                      </AnimatePresence>
+                    )}
                   </motion.div>
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-8 py-4 border-t border-slate-100">
@@ -472,7 +515,7 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
                               initial={{ opacity: 0, scale: 0.9 }}
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.9 }}
-                              onClick={() => setCurrentFolderId(folder.id)}
+                              onClick={() => onFolderChange(folder.id)}
                               className="bg-white p-4 rounded-2xl border border-slate-200 hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group flex items-center justify-between"
                             >
                               <div className="flex items-center gap-3 overflow-hidden">

@@ -17,6 +17,7 @@ interface RightPanelProps {
   onDeleteElement: (id: string) => void;
   onGroup: () => void;
   onUngroup: () => void;
+  onDuplicateElement: () => void;
   pageBackground: string;
   onPageBackgroundChange: (bg: string) => void;
 }
@@ -28,6 +29,7 @@ export function RightPanel({
   onDeleteElement, 
   onGroup,
   onUngroup,
+  onDuplicateElement,
   pageBackground, 
   onPageBackgroundChange 
 }: RightPanelProps) {
@@ -155,10 +157,11 @@ export function RightPanel({
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Grouping</label>
+            <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Actions</label>
             <div className="grid grid-cols-2 gap-2">
               <button onClick={onGroup} className="p-2 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 flex items-center justify-center gap-2 text-xs font-bold"><Group size={18} /> Group</button>
               <button onClick={onUngroup} className="p-2 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 flex items-center justify-center gap-2 text-xs font-bold"><Ungroup size={18} /> Ungroup</button>
+              <button onClick={onDuplicateElement} className="p-2 bg-slate-50 hover:bg-slate-100 rounded border border-slate-200 flex items-center justify-center gap-2 text-xs font-bold col-span-2"><Plus size={18} /> Duplicate</button>
             </div>
           </div>
 

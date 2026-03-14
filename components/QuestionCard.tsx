@@ -9,7 +9,7 @@ declare const katex: any;
 interface QuestionCardProps {
   question: Question;
   selected?: boolean;
-  viewMode?: 'grid' | 'list';
+  viewMode?: 'grid' | 'list' | 'table';
   onSelect?: (id: string) => void;
   onEdit?: (question: Question) => void;
   onDelete?: () => void;
@@ -60,7 +60,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
         const math = part.slice(1, -1);
         const span = document.createElement('span');
         try {
-          katex.render(math, span, { throwOnError: false, displayMode: false });
+          katex.render(math, span, { throwOnError: false, displayMode: false, strict: false });
           element.appendChild(span);
         } catch (e) {
           element.appendChild(document.createTextNode(part));
