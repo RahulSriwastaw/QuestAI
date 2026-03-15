@@ -16,6 +16,22 @@ async function startServer() {
 
   const PORT = 3000;
 
+  app.use(express.json());
+
+  app.post("/api/sets", (req, res) => {
+    const { name, subject_id, chapter_id, description, questions, visibility } = req.body;
+    console.log('Received request to create set:', { name, subject_id, chapter_id, description, questions, visibility });
+    
+    // Simulate creating a set and returning the details
+    const createdSet = {
+      id: Math.random().toString(36).substring(7),
+      set_id: Math.random().toString(36).substring(7).toUpperCase(),
+      password: Math.random().toString(36).substring(7).toUpperCase()
+    };
+    
+    res.json(createdSet);
+  });
+
   // Store document states by document ID
   const documents: Record<string, any> = {};
 

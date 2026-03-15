@@ -246,7 +246,7 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
               <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-3 py-1.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                   <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                    QUESTION
+                    QUESTION (ENGLISH)
                   </span>
                   <div className="flex items-center gap-0.5">
                     <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Bold size={12} /></button>
@@ -260,10 +260,25 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                   </div>
                 </div>
                 <textarea
-                  value={editedQuestion.question_text}
-                  onChange={(e) => handleChange('question_text', e.target.value)}
-                  className="w-full p-3 min-h-[100px] text-xs text-slate-700 focus:outline-none resize-y"
-                  placeholder="Enter question text here..."
+                  value={editedQuestion.question_eng || editedQuestion.question_text}
+                  onChange={(e) => {
+                    handleChange('question_eng', e.target.value);
+                    if (!editedQuestion.question_hin) handleChange('question_text', e.target.value);
+                  }}
+                  className="w-full p-3 min-h-[80px] text-xs text-slate-700 focus:outline-none resize-y"
+                  placeholder="Enter English question text here..."
+                />
+                
+                <div className="px-3 py-1.5 bg-slate-50 border-y border-slate-200 flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                    QUESTION (HINDI)
+                  </span>
+                </div>
+                <textarea
+                  value={editedQuestion.question_hin || ''}
+                  onChange={(e) => handleChange('question_hin', e.target.value)}
+                  className="w-full p-3 min-h-[80px] text-xs text-slate-700 focus:outline-none resize-y"
+                  placeholder="Enter Hindi question text here..."
                 />
                 <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-100 text-[9px] text-slate-400 text-right">
                   {editedQuestion.question_text.length} characters
@@ -394,13 +409,25 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                   <ChevronRight size={14} className={`text-slate-400 transition-transform ${showExplanation ? 'rotate-90' : ''}`} />
                 </button>
                 {showExplanation && (
-                  <div className="p-3 border-t border-slate-200">
-                    <textarea
-                      value={editedQuestion.solution_eng || ''}
-                      onChange={(e) => handleChange('solution_eng', e.target.value)}
-                      className="w-full p-2 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400 min-h-[80px]"
-                      placeholder="Add step-by-step solution here..."
-                    />
+                  <div className="p-3 border-t border-slate-200 space-y-3">
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">English Solution</label>
+                      <textarea
+                        value={editedQuestion.solution_eng || ''}
+                        onChange={(e) => handleChange('solution_eng', e.target.value)}
+                        className="w-full p-2 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400 min-h-[80px]"
+                        placeholder="Add English step-by-step solution here..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Hindi Solution</label>
+                      <textarea
+                        value={editedQuestion.solution_hin || ''}
+                        onChange={(e) => handleChange('solution_hin', e.target.value)}
+                        className="w-full p-2 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400 min-h-[80px]"
+                        placeholder="Add Hindi step-by-step solution here..."
+                      />
+                    </div>
                   </div>
                 )}
               </div>

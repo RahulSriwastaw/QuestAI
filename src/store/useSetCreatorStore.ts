@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { Question } from '../types';
+import { createSet } from '../services/setService';
+import { supabase } from '../services/supabaseClient';
 
 interface SetCreatorStore {
   step: 1 | 2 | 3 | 'success';
@@ -21,6 +23,8 @@ interface SetCreatorStore {
   filtered_questions: Question[];
   set_questions: Question[];
   visibility: 'private' | 'org_only' | 'public';
+  isSaving: boolean;
+  error: string | null;
   
   setStep: (step: 1 | 2 | 3 | 'success') => void;
   setField: (field: string, value: any) => void;
@@ -29,6 +33,8 @@ interface SetCreatorStore {
   addToSet: (question: Question) => void;
   removeFromSet: (id: string) => void;
   reorderSet: (questions: Question[]) => void;
+  createSet: () => Promise<void>;
+  created_set: { id: string; set_id: string; questionIds: string[]; password: string } | null;
   reset: () => void;
 }
 
@@ -52,6 +58,9 @@ export const useSetCreatorStore = create<SetCreatorStore>((set, get) => ({
   filtered_questions: [],
   set_questions: [],
   visibility: 'private',
+  isSaving: false,
+  error: null,
+  created_set: null,
 
   setStep: (step) => set({ step }),
   setField: (field, value) => set((state) => ({ ...state, [field]: value })),
@@ -59,13 +68,29 @@ export const useSetCreatorStore = create<SetCreatorStore>((set, get) => ({
     filters: { ...state.filters, [filter]: value }
   })),
   fetchQuestions: async () => {
-    // Mock API call
-    console.log('Fetching with filters:', get().filters);
-    const mockQuestions: Question[] = [
-      { id: 'q1', question_number: 1, question_text: 'If α and β are roots of x²-5x+6=0, find α²+β²', options: { A: '25', B: '13', C: '11', D: '12' }, answer: 'B', difficulty: 'easy', type: 'mcq' },
-      { id: 'q2', question_number: 2, question_text: 'Solve: 2x²+5x-3=0', options: { A: '0.5', B: '-3', C: 'Both A&B', D: 'None' }, answer: 'C', difficulty: 'medium', type: 'mcq' },
-    ];
-    set({ filtered_questions: mockQuestions });
+    const { filters } = get();
+    let query = supabase.from('bank_questions').select('*');
+    
+    if (filters.search_text) {
+      // Querying JSONB field question_data for question_text
+      query = query.ilike('question_data->>question_text', `%${filters.search_text}%`);
+    }
+    
+    const { data, error } = await query;
+    if (error) {
+      console.error('Error fetching questions:', error);
+      set({ error: `Failed to fetch questions: ${error.message}` });
+      return;
+    }
+
+    const mappedQuestions = (data || []).map(q => ({
+      id: q.id,
+      folderId: q.folder_id || null,
+      savedAt: Number(q.saved_at),
+      ...q.question_data
+    }));
+
+    set({ filtered_questions: mappedQuestions });
   },
   addToSet: (question) => set((state) => ({
     set_questions: [...state.set_questions, question]
@@ -74,9 +99,41 @@ export const useSetCreatorStore = create<SetCreatorStore>((set, get) => ({
     set_questions: state.set_questions.filter((q) => q.id !== id)
   })),
   reorderSet: (questions) => set({ set_questions: questions }),
+  createSet: async () => {
+    const { name, subject_id, chapter_id, description, set_questions, visibility } = get();
+    try {
+      set({ isSaving: true, error: null });
+      
+      const { data, error } = await supabase.from('sets').insert({
+        name,
+        subject_id,
+        chapter_id,
+        description,
+        question_ids: set_questions.map(q => q.id), // Storing IDs instead of full objects for consistency
+        visibility
+      }).select().single();
+
+      if (error) throw error;
+      
+      set({ 
+        step: 'success',
+        isSaving: false,
+        created_set: { 
+          id: data.id, 
+          set_id: data.name,
+          questionIds: data.question_ids || [], 
+          password: 'N/A' 
+        }
+      });
+    } catch (error: any) {
+      console.error('Failed to create set:', error);
+      set({ error: error.message, isSaving: false });
+    }
+  },
   reset: () => set({
     step: 1,
     name: '',
     set_questions: [],
+    created_set: null
   }),
 }));

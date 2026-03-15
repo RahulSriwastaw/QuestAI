@@ -15,7 +15,7 @@ function getAI(): GoogleGenAI {
 
 export async function extractQuestionsFromPage(imageBase64: string, pageNumber: number) {
   const response = await getAI().models.generateContent({
-    model: "gemini-3-flash-latest",
+    model: "gemini-3-flash-preview",
     contents: [
       {
         inlineData: {
@@ -80,7 +80,7 @@ export async function performOCR(imageUrl: string) {
 
 export async function suggestLayout(elements: any[], width: number, height: number) {
   const response = await getAI().models.generateContent({
-    model: "gemini-3-flash-latest",
+    model: "gemini-3-flash-preview",
     contents: `Suggest a better layout for these design elements on a ${width}x${height} canvas. 
     Maintain the content but optimize their positions (x, y) for a professional look.
     Elements: ${JSON.stringify(elements.map(el => ({ id: el.id, type: el.type, width: el.width, height: el.height })))}
@@ -111,7 +111,7 @@ export async function suggestLayout(elements: any[], width: number, height: numb
 }
 export async function generateDesignElements(prompt: string) {
   const response = await getAI().models.generateContent({
-    model: "gemini-3-flash-latest",
+    model: "gemini-3-flash-preview",
     contents: `Generate a list of design elements based on this prompt: "${prompt}". 
     The output must be a JSON array of elements. Each element should follow this structure:
     {
@@ -159,24 +159,24 @@ export async function generateDesignElements(prompt: string) {
   }
 }
 
-export async function generateCurrentAffairsQuestions(
+export async function generateAIQuestions(
   date: string,
   topic: string,
   count: number,
   language: string,
   isBilingual: boolean
 ) {
-  const prompt = `Generate ${count} multiple-choice questions about current affairs for the timeframe: ${date}. 
-  ${topic ? `Focus on the topic: ${topic}.` : 'Cover a mix of important national and international news.'}
-  The language of the questions and options should be ${language}.
-  ${isBilingual ? 'Also, provide the question text in both English and Hindi.' : ''}
+  const prompt = `Generate ${count} multiple-choice questions for the timeframe/context: ${date}. 
+  ${topic ? `Focus on the topic: ${topic}.` : 'Cover a mix of important general knowledge and current affairs.'}
+  The primary language of the questions and options should be ${language}.
+  ${isBilingual ? 'For bilingual mode, provide the question text and all options in both English and Hindi. Format bilingual text as "English Text / Hindi Text".' : ''}
   
   Return a JSON array of questions. Each question must have:
   - question_number: number (starting from 1)
-  - question_text: string (in the selected language)
+  - question_text: string (in the selected language or bilingual format)
   - question_eng: string (in English)
   - question_hin: string (in Hindi)
-  - options: { A: string, B: string, C: string, D: string }
+  - options: { A: string, B: string, C: string, D: string } (each option should be in the selected language or bilingual format)
   - answer: string (the correct option letter: A, B, C, or D)
   - solution_hin: string (detailed explanation of the answer in Hindi)
   - solution_eng: string (detailed explanation of the answer in English)

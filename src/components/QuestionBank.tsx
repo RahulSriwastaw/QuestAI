@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Folder, BankQuestion, Question, QuestionSet } from '../types';
 import { 
@@ -47,6 +47,7 @@ interface QuestionBankProps {
   onCreateSet: (name: string, password: string | undefined, questionIds: string[]) => void;
   onBulkDelete: (ids: string[]) => void;
   onBulkEdit: (ids: string[], prompt: string) => void;
+  onBulkUpdate: (ids: string[], updates: Partial<Question>, mode?: 'add' | 'replace') => void;
 }
 
 const QuestionBank: React.FC<QuestionBankProps> = ({ 
@@ -66,11 +67,14 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   onImportCSV,
   onCreateSet,
   onBulkDelete,
-  onBulkEdit
+  onBulkEdit,
+  onBulkUpdate
 }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [folderSearchQuery, setFolderSearchQuery] = useState('');
+  const [selectedExam, setSelectedExam] = useState<string>('All');
+  const [selectedSubject, setSelectedSubject] = useState<string>('All');
   const [showNewFolderModal, setShowNewFolderModal] = useState(false);
   const [showBulkAIEditModal, setShowBulkAIEditModal] = useState(false);
   const [showBulkTagModal, setShowBulkTagModal] = useState(false);
@@ -94,6 +98,9 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   const safeFolders = folders || [];
   const safeQuestions = questions || [];
 
+  const exams = useMemo(() => ['All', ...Array.from(new Set(safeQuestions.map(q => q.exam || 'Unknown')))], [safeQuestions]);
+  const subjects = useMemo(() => ['All', ...Array.from(new Set(safeQuestions.map(q => q.subject || 'Unknown')))], [safeQuestions]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       onImportCSV(e.target.files[0]);
@@ -116,7 +123,9 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
     const matchesStatus = statusFilter === 'all' || (q.status === statusFilter);
     const qRefinement = q.refinementStatus || 'pending';
     const matchesRefinement = refinementTab === 'pending' ? (qRefinement !== 'final') : (qRefinement === 'final');
-    return matchesSearch && matchesStatus && matchesRefinement;
+    const matchesExam = selectedExam === 'All' || q.exam === selectedExam;
+    const matchesSubject = selectedSubject === 'All' || q.subject === selectedSubject;
+    return matchesSearch && matchesStatus && matchesRefinement && matchesExam && matchesSubject;
   });
 
   const totalPages = Math.ceil(allQuestions.length / itemsPerPage);
@@ -328,6 +337,20 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
               className="w-full pl-7 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-[10px] focus:ring-primary focus:border-primary transition-all"
             />
           </div>
+          <select
+            value={selectedExam}
+            onChange={(e) => setSelectedExam(e.target.value)}
+            className="px-2 py-1.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded hover:bg-slate-50 transition-all shadow-sm"
+          >
+            {exams.map(exam => <option key={exam} value={exam}>{exam}</option>)}
+          </select>
+          <select
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+            className="px-2 py-1.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded hover:bg-slate-50 transition-all shadow-sm"
+          >
+            {subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+          </select>
           <button 
             onClick={() => fileInputRef.current?.click()}
             className="px-2 py-1.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded hover:bg-slate-50 transition-all flex items-center gap-1 shadow-sm"
@@ -392,13 +415,8 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
       <BulkTagModal
         isOpen={showBulkTagModal}
         onClose={() => setShowBulkTagModal(false)}
-        onApply={(tags) => {
-          selectedQuestionIds.forEach(id => {
-            const question = safeQuestions.find(q => q.id === id);
-            if (question) {
-              onUpdateQuestion && onUpdateQuestion({ ...question, tags: [...(question.tags || []), ...tags] });
-            }
-          });
+        onApply={(tags, mode) => {
+          onBulkUpdate(Array.from(selectedQuestionIds), { tags }, mode);
           setShowBulkTagModal(false);
           setSelectedQuestionIds(new Set());
         }}

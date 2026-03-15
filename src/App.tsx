@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import * as Papa from 'papaparse';
+import csv from 'papaparse';
 import { Question, ProcessStep, PageData, DocumentData, Folder, BankQuestion, QuestionSet } from './types';
 import FileUpload from './components/FileUpload';
 import ProcessStatus from './components/ProcessStatus';
@@ -10,7 +10,7 @@ import QuestionCard from './components/QuestionCard';
 import { QuestionEditPanel } from './components/QuestionEditPanel';
 import QuestionBank from './components/QuestionBank';
 import SetsView from './components/SetsView';
-import CurrentAffairsGenerator from './components/CurrentAffairsGenerator';
+import AIQuestionGenerator from './components/AIQuestionGenerator';
 import LandingPage from './components/LandingPage';
 import { convertPdfToImages, cropDiagram } from './services/pdfService';
 import { extractQuestionsFromPage, performOCR } from './services/geminiService';
@@ -48,6 +48,7 @@ import {
   RotateCcw,
   Loader2,
   Menu,
+  Sparkles,
   ChevronLeft,
   ChevronRight,
   Database,
@@ -118,7 +119,7 @@ const App: React.FC = () => {
     }
   });
 
-  const [currentView, setCurrentView] = useState<'extraction' | 'bank' | 'sets' | 'current-affairs'>('extraction');
+  const [currentView, setCurrentView] = useState<'extraction' | 'bank' | 'sets' | 'ai-generator'>('extraction');
   const [folders, setFolders] = useState<Folder[]>(() => {
     try {
       const saved = localStorage.getItem('questai_folders');
@@ -933,8 +934,8 @@ const App: React.FC = () => {
       const { error } = await supabase.from('bank_questions').delete().in('folder_id', idsToDelete);
       if (error) throw error;
       
-      setFolders(folders.filter(f => !idsToDelete.includes(f.id)));
-      setBankQuestions(bankQuestions.filter(q => !q.folderId || !idsToDelete.includes(q.folderId)));
+      setFolders(prev => prev.filter(f => !idsToDelete.includes(f.id)));
+      setBankQuestions(prev => prev.filter(q => !q.folderId || !idsToDelete.includes(q.folderId)));
       setToast({ message: 'Folder deleted successfully', type: 'success' });
     } catch (err: any) {
       console.error('Error deleting folder:', err);
@@ -946,7 +947,7 @@ const App: React.FC = () => {
     try {
       const { error } = await supabase.from('bank_questions').delete().eq('id', id);
       if (error) throw error;
-      setBankQuestions(bankQuestions.filter(q => q.id !== id));
+      setBankQuestions(prev => prev.filter(q => q.id !== id));
       setToast({ message: 'Question deleted successfully', type: 'success' });
     } catch (err: any) {
       console.error('Error deleting question:', err);
@@ -965,7 +966,7 @@ const App: React.FC = () => {
 
       if (error) throw error;
 
-      setBankQuestions(bankQuestions.map(q => 
+      setBankQuestions(prev => prev.map(q => 
         q.id === updatedQuestion.id ? { ...q, ...updatedQuestion } : q
       ));
       setToast({ message: 'Question updated successfully', type: 'success' });
@@ -979,7 +980,7 @@ const App: React.FC = () => {
     console.log('Importing file:', file.name, file.type, file.size);
     setToast({ message: `Starting import for ${file.name}...`, type: 'success' });
     try {
-      Papa.parse(file, {
+      csv.parse(file, {
         header: true,
         skipEmptyLines: true,
         complete: async (results) => {
@@ -1063,7 +1064,7 @@ const App: React.FC = () => {
         }
       });
     } catch (err: any) {
-      console.error('Error calling Papa.parse:', err);
+      console.error('Error calling csv.parse:', err);
       setToast({ message: `Error starting import: ${err.message}`, type: 'error' });
     }
   };
@@ -1092,9 +1093,16 @@ const App: React.FC = () => {
     setToast({ message: 'Set deleted successfully', type: 'success' });
   };
 
-  const handleBulkDeleteQuestions = (ids: string[]) => {
-    setBankQuestions(prev => prev.filter(q => !ids.includes(q.id)));
-    setToast({ message: `Successfully deleted ${ids.length} questions!`, type: 'success' });
+  const handleBulkDeleteQuestions = async (ids: string[]) => {
+    try {
+      const { error } = await supabase.from('bank_questions').delete().in('id', ids);
+      if (error) throw error;
+      setBankQuestions(prev => prev.filter(q => !ids.includes(q.id)));
+      setToast({ message: `Successfully deleted ${ids.length} questions!`, type: 'success' });
+    } catch (err: any) {
+      console.error('Error bulk deleting questions:', err);
+      setToast({ message: `Failed to delete: ${err.message}`, type: 'error' });
+    }
   };
 
   const handleBulkEditQuestions = async (ids: string[], prompt: string) => {
@@ -1107,6 +1115,19 @@ const App: React.FC = () => {
       const updated = updatedQuestions.find(uq => uq.id === q.id);
       return updated ? { ...q, ...updated } : q;
     }));
+
+    // Persist bulk edits to Supabase
+    try {
+      const updatePromises = updatedQuestions.map(q => 
+        supabase
+          .from('bank_questions')
+          .update({ question_data: q })
+          .eq('id', q.id)
+      );
+      await Promise.all(updatePromises);
+    } catch (err) {
+      console.error('Error persisting bulk edits to Supabase:', err);
+    }
     
     if (errors.length > 0) {
       console.error('Bulk edit errors:', errors);
@@ -1116,6 +1137,52 @@ const App: React.FC = () => {
       });
     } else {
       setToast({ message: `Successfully bulk edited ${updatedQuestions.length} questions!`, type: 'success' });
+    }
+  };
+
+  const handleBulkUpdateQuestions = async (ids: string[], updates: Partial<Question>, mode: 'add' | 'replace' = 'replace') => {
+    try {
+      setToast({ message: `Updating ${ids.length} questions...`, type: 'success' });
+      
+      const updatedBankQuestions = bankQuestions.map(q => {
+        if (ids.includes(q.id)) {
+          let newQuestionData = { ...q, ...updates };
+          
+          // Handle tag appending if mode is 'add'
+          if (mode === 'add' && updates.tags) {
+            const existingTags = q.tags || [];
+            const newTags = Array.from(new Set([...existingTags, ...updates.tags]));
+            newQuestionData = { ...newQuestionData, tags: newTags };
+          }
+          
+          return newQuestionData;
+        }
+        return q;
+      });
+
+      setBankQuestions(updatedBankQuestions);
+
+      // Persist to Supabase
+      const updatePromises = ids.map(id => {
+        const question = updatedBankQuestions.find(q => q.id === id);
+        if (!question) return Promise.resolve();
+        return supabase
+          .from('bank_questions')
+          .update({ question_data: question })
+          .eq('id', id);
+      });
+
+      const results = await Promise.all(updatePromises);
+      const errors = results.filter((r: any) => r && r.error);
+
+      if (errors.length > 0) {
+        throw new Error(`Failed to update ${errors.length} questions`);
+      }
+
+      setToast({ message: `Successfully updated ${ids.length} questions!`, type: 'success' });
+    } catch (err: any) {
+      console.error('Error bulk updating questions:', err);
+      setToast({ message: `Failed to update: ${err.message}`, type: 'error' });
     }
   };
 
@@ -1165,12 +1232,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleCurrentAffairsGenerated = (generatedQuestions: Question[], topic: string, date: string) => {
+  const handleAIGenerated = (generatedQuestions: Question[], topic: string, date: string) => {
     setQuestions(generatedQuestions);
-    setFileName(`Current Affairs - ${date}${topic ? ` - ${topic}` : ''}`);
+    setFileName(`AI Generated - ${date}${topic ? ` - ${topic}` : ''}`);
     setStep(ProcessStep.COMPLETED);
     setCurrentView('extraction');
-    setToast({ message: `Successfully generated ${generatedQuestions.length} current affairs questions!`, type: 'success' });
+    setToast({ message: `Successfully generated ${generatedQuestions.length} questions!`, type: 'success' });
   };
 
   if (showLanding) {
@@ -1258,7 +1325,7 @@ const App: React.FC = () => {
               { id: 'extraction', icon: <UploadCloud size={18} />, label: 'Extraction' },
               { id: 'bank', icon: <Database size={18} />, label: 'Question Bank' },
               { id: 'sets', icon: <Layers size={18} />, label: 'Sets' },
-              { id: 'current-affairs', icon: <Globe size={18} />, label: 'Current Affairs' }
+              { id: 'ai-generator', icon: <Sparkles size={18} />, label: 'AI Generator' }
             ].map((item, index) => (
               <motion.button 
                 key={item.id}
@@ -1408,6 +1475,7 @@ const App: React.FC = () => {
                   onCreateSet={handleCreateSet}
                   onBulkDelete={handleBulkDeleteQuestions}
                   onBulkEdit={handleBulkEditQuestions}
+                  onBulkUpdate={handleBulkUpdateQuestions}
                 />
               ) : currentView === 'sets' ? (
                 <SetsView 
@@ -1421,9 +1489,9 @@ const App: React.FC = () => {
                   onExportCSV={handleExportCSV}
                   onUpdateQuestion={handleUpdateBankQuestion}
                 />
-              ) : currentView === 'current-affairs' ? (
+              ) : currentView === 'ai-generator' ? (
                 <div className="flex-1 h-full bg-gradient-to-br from-slate-50 to-slate-100">
-                  <CurrentAffairsGenerator onQuestionsGenerated={handleCurrentAffairsGenerated} />
+                  <AIQuestionGenerator onQuestionsGenerated={handleAIGenerated} />
                 </div>
               ) : (
                 <div className="flex-1 h-full bg-gradient-to-br from-slate-50 to-slate-100">

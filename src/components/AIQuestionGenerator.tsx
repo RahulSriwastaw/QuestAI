@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { generateCurrentAffairsQuestions } from '../services/geminiService';
+import { generateAIQuestions } from '../services/geminiService';
 import { Question } from '../types';
-import { Calendar, Loader2, Save, Globe, BookOpen } from 'lucide-react';
+import { Calendar, Loader2, Globe, BookOpen, Sparkles } from 'lucide-react';
 
-interface CurrentAffairsGeneratorProps {
+interface AIQuestionGeneratorProps {
   onQuestionsGenerated: (questions: Question[], topic: string, date: string) => void;
 }
 
-export default function CurrentAffairsGenerator({ onQuestionsGenerated }: CurrentAffairsGeneratorProps) {
-  const [timeframe, setTimeframe] = useState<'Daily' | 'Monthly' | 'Yearly'>('Daily');
+export default function AIQuestionGenerator({ onQuestionsGenerated }: AIQuestionGeneratorProps) {
+  const [timeframe, setTimeframe] = useState<'Daily' | 'Monthly' | 'Yearly' | 'General'>('Daily');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [topic, setTopic] = useState('');
   const [count, setCount] = useState(10);
-  const [language, setLanguage] = useState('English');
-  const [isBilingual, setIsBilingual] = useState(false);
+  const [language, setLanguage] = useState<'English' | 'Hindi' | 'Bilingual'>('English');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
@@ -26,14 +25,21 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
       let targetDate = date;
       if (timeframe === 'Monthly') targetDate = month;
       if (timeframe === 'Yearly') targetDate = year;
+      if (timeframe === 'General') targetDate = 'General Knowledge';
 
-      const generated = await generateCurrentAffairsQuestions(targetDate, topic, count, language, isBilingual);
+      const generated = await generateAIQuestions(
+        targetDate, 
+        topic, 
+        count, 
+        language === 'Bilingual' ? 'English and Hindi' : language, 
+        language === 'Bilingual'
+      );
       
       // Map to Question type
       const formattedQuestions: Question[] = generated.map((q: any) => ({
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         question_number: q.question_number,
-        question_text: isBilingual ? `${q.question_eng} / ${q.question_hin}` : q.question_text,
+        question_text: language === 'Bilingual' ? `${q.question_eng} / ${q.question_hin}` : q.question_text,
         question_eng: q.question_eng,
         question_hin: q.question_hin,
         options: q.options,
@@ -42,10 +48,10 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
         solution_eng: q.solution_eng,
         has_diagram: false,
         page_number: 1,
-        tags: ['Current Affairs', date]
+        tags: ['AI Generated', timeframe === 'General' ? 'General' : date, topic].filter(Boolean) as string[]
       }));
 
-      onQuestionsGenerated(formattedQuestions, topic, date);
+      onQuestionsGenerated(formattedQuestions, topic || 'AI Generated', targetDate);
     } catch (error) {
       console.error("Error generating questions:", error);
       alert("Failed to generate questions. Please try again.");
@@ -62,33 +68,34 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
     >
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
-            <Globe size={20} />
+          <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+            <Sparkles size={20} />
           </div>
           <div>
-            <h2 className="text-xl font-black text-dark">Current Affairs Generator</h2>
-            <p className="text-slate-500 text-[10px] mt-0.5">Generate daily current affairs questions using AI</p>
+            <h2 className="text-xl font-black text-dark">AI Question Generator</h2>
+            <p className="text-slate-500 text-[10px] mt-0.5">Generate high-quality questions on any topic using AI</p>
           </div>
         </div>
 
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-slate-500 uppercase">Timeframe</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Context / Timeframe</label>
               <select 
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value as any)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               >
-                <option value="Daily">Daily</option>
-                <option value="Monthly">Monthly</option>
-                <option value="Yearly">Yearly</option>
+                <option value="Daily">Daily Context</option>
+                <option value="Monthly">Monthly Context</option>
+                <option value="Yearly">Yearly Context</option>
+                <option value="General">General Knowledge</option>
               </select>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-[9px] font-bold text-slate-500 uppercase">
-                {timeframe === 'Daily' ? 'Select Date' : timeframe === 'Monthly' ? 'Select Month' : 'Select Year'}
+                {timeframe === 'Daily' ? 'Select Date' : timeframe === 'Monthly' ? 'Select Month' : timeframe === 'Yearly' ? 'Select Year' : 'Context'}
               </label>
               <div className="relative">
                 <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
@@ -118,43 +125,43 @@ export default function CurrentAffairsGenerator({ onQuestionsGenerated }: Curren
                     className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 )}
+                {timeframe === 'General' && (
+                  <input 
+                    type="text" 
+                    disabled
+                    value="General Knowledge"
+                    className="w-full pl-8 pr-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs font-medium text-slate-400"
+                  />
+                )}
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-slate-500 uppercase">Language</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Language Mode</label>
               <div className="flex items-center gap-4">
                 <select 
                   value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
+                  onChange={(e) => setLanguage(e.target.value as any)}
                   className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 >
-                  <option value="English">English</option>
-                  <option value="Hindi">Hindi</option>
+                  <option value="English">English Only</option>
+                  <option value="Hindi">Hindi Only</option>
+                  <option value="Bilingual">Bilingual (English + Hindi)</option>
                 </select>
-                <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={isBilingual}
-                    onChange={(e) => setIsBilingual(e.target.checked)}
-                    className="accent-primary"
-                  />
-                  Bilingual
-                </label>
               </div>
             </div>
             
             <div className="space-y-1.5">
-              <label className="text-[9px] font-bold text-slate-500 uppercase">Specific Topic (Optional)</label>
+              <label className="text-[9px] font-bold text-slate-500 uppercase">Specific Topic</label>
               <div className="relative">
                 <BookOpen className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                 <input 
                   type="text" 
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g., Sports, Union Budget..."
+                  placeholder="e.g., Physics, History, Sports..."
                   className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 />
               </div>

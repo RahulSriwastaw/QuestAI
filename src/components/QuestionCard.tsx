@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Question } from '../types';
-import { Copy, Check, Edit2, Trash2, FileText, Layout, MoreVertical } from 'lucide-react';
+import { Copy, Check, Edit2, Trash2, FileText, Layout, MoreVertical, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 declare const katex: any;
@@ -22,7 +22,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
   const [isFinal, setIsFinal] = useState(question.refinementStatus === 'final');
   const [copied, setCopied] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
   const questionRef = useRef<HTMLParagraphElement>(null);
+  const solutionEngRef = useRef<HTMLDivElement>(null);
+  const solutionHinRef = useRef<HTMLDivElement>(null);
   
   const toggleRefinement = () => {
     const newStatus = isFinal ? 'pending' : 'final';
@@ -77,7 +80,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
       const val = question.options[label as keyof typeof question.options] as string;
       renderMath(val, optionsRefs.current[idx]);
     });
-  }, [question]);
+    if (showSolution) {
+      renderMath(question.solution_eng, solutionEngRef.current);
+      renderMath(question.solution_hin, solutionHinRef.current);
+    }
+  }, [question, showSolution]);
 
   return (
     <motion.div 
@@ -186,6 +193,27 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
               ))}
             </div>
           )}
+
+          {showSolution && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-2 pt-2 border-t border-slate-100 space-y-2"
+            >
+              {question.solution_eng && (
+                <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100/50">
+                  <span className="text-[7px] font-black text-blue-500 uppercase tracking-widest block mb-1">English Solution</span>
+                  <div ref={solutionEngRef} className="text-[9px] text-slate-600 leading-relaxed italic"></div>
+                </div>
+              )}
+              {question.solution_hin && (
+                <div className="bg-emerald-50/50 p-2 rounded-lg border border-emerald-100/50">
+                  <span className="text-[7px] font-black text-emerald-500 uppercase tracking-widest block mb-1">Hindi Solution</span>
+                  <div ref={solutionHinRef} className="text-[9px] text-slate-600 leading-relaxed italic"></div>
+                </div>
+              )}
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -236,6 +264,17 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
         </div>
 
         <div className={`flex items-center gap-0.5 ${viewMode === 'list' ? 'md:flex-col' : ''}`}>
+          <button 
+            onClick={() => setShowSolution(!showSolution)}
+            title="View Solution"
+            className={`p-1 rounded-md transition-all ${
+              showSolution 
+                ? 'text-blue-600 bg-blue-100 shadow-sm' 
+                : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'
+            }`}
+          >
+            <Sparkles size={10} className={showSolution ? 'stroke-[3]' : ''} />
+          </button>
           <button 
             onClick={toggleRefinement}
             title="Mark as Final"

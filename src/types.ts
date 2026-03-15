@@ -32,6 +32,8 @@ export interface Question {
   answer?: string;
   solution_hin?: string;
   solution_eng?: string;
+  difficulty?: 'easy' | 'medium' | 'hard' | 'very_hard';
+  type?: 'mcq' | 'subjective' | 'mcq_single' | 'mcq_multiple' | 'integer' | 'true_false' | 'fill_blank' | 'assertion_reason' | 'match_column' | 'numerical';
   status?: 'active' | 'draft';
   refinementStatus?: 'pending' | 'final';
   tags?: string[];
