@@ -94,10 +94,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
       exit={{ opacity: 0, scale: 0.95 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className={`group relative bg-white rounded-xl border transition-all duration-300 flex ${viewMode === 'list' ? 'flex-col md:flex-row' : 'flex-col'} h-full overflow-hidden ${
+      className={`group relative bg-white rounded-2xl border transition-all duration-300 flex ${viewMode === 'list' ? 'flex-col md:flex-row' : 'flex-col'} h-full overflow-hidden ${
         selected 
-          ? 'border-primary ring-1 ring-primary/10 shadow-md shadow-primary/5' 
-          : 'border-slate-200 hover:border-primary/30 hover:shadow-md hover:shadow-slate-200/50'
+          ? 'border-primary ring-2 ring-primary/20 shadow-xl shadow-primary/10' 
+          : 'border-slate-200 hover:border-primary/40 hover:shadow-lg hover:shadow-slate-200/50'
       }`}
     >
       {/* Selection Overlay */}
@@ -127,8 +127,8 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
               </div>
             )}
             <div className="flex items-center gap-1">
-              <div className={`flex items-center justify-center w-4 h-4 rounded font-black text-[10px] transition-colors duration-200 ${
-                selected ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-primary/10 group-hover:text-primary'
+              <div className={`flex items-center justify-center w-5 h-5 rounded-lg font-black text-[10px] transition-all duration-300 ${
+                selected ? 'bg-primary text-white scale-110' : 'bg-slate-100 text-slate-600 group-hover:bg-primary group-hover:text-white'
               }`}>
                 {question.question_number}
               </div>
@@ -267,38 +267,38 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, selected, viewMod
           <button 
             onClick={() => setShowSolution(!showSolution)}
             title="View Solution"
-            className={`p-1 rounded-md transition-all ${
+            className={`p-1.5 rounded-lg transition-all ${
               showSolution 
-                ? 'text-blue-600 bg-blue-100 shadow-sm' 
-                : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'
+                ? 'text-accent-2 bg-accent-2/10 shadow-sm' 
+                : 'text-slate-400 hover:text-accent-2 hover:bg-accent-2/5'
             }`}
           >
-            <Sparkles size={10} className={showSolution ? 'stroke-[3]' : ''} />
+            <Sparkles size={12} className={showSolution ? 'stroke-[3]' : ''} />
           </button>
           <button 
             onClick={toggleRefinement}
             title="Mark as Final"
-            className={`p-1 rounded-md transition-all ${
+            className={`p-1.5 rounded-lg transition-all ${
               isFinal 
                 ? 'text-emerald-600 bg-emerald-100 shadow-sm' 
                 : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50'
             }`}
           >
-            <Check size={10} className={isFinal ? 'stroke-[3]' : ''} />
+            <Check size={12} className={isFinal ? 'stroke-[3]' : ''} />
           </button>
           <button 
             onClick={() => onEdit && onEdit(question)}
             title="Edit Question"
-            className="p-1 rounded-md text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-all"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-all"
           >
-            <Edit2 size={10} />
+            <Edit2 size={12} />
           </button>
           <button 
             onClick={() => onDelete && onDelete()}
             title="Delete Question"
-            className="p-1 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
           >
-            <Trash2 size={10} />
+            <Trash2 size={12} />
           </button>
         </div>
       </div>

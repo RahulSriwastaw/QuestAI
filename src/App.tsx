@@ -1246,36 +1246,36 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-primary/20">
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 py-3 sticky top-0 z-50">
-        <div className="max-w-full mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-6">
+      <nav className="bg-white/90 backdrop-blur-md border-b border-slate-200 py-2 sticky top-0 z-50">
+        <div className="max-w-full mx-auto px-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2.5 hover:bg-slate-100 rounded-xl text-slate-500 transition-all active:scale-95"
+              className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-all active:scale-95"
             >
-              <Menu size={20} />
+              <Menu size={18} />
             </button>
             <div 
               onClick={() => setShowLanding(true)}
               className="flex items-center gap-2 cursor-pointer group"
             >
-              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-                <Database className="text-white w-4.5 h-4.5" />
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                <Database className="text-white w-4 h-4" />
               </div>
-              <span className="text-2xl font-black text-dark font-display tracking-tight">
+              <span className="text-xl font-black text-dark font-display tracking-tight">
                 Quest<span className="text-primary">AI</span>
               </span>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-4">
-            <div className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              v2.5 Enterprise
+          <div className="hidden sm:flex items-center gap-3">
+            <div className="px-2 py-0.5 bg-accent-1/30 text-primary rounded-full text-[9px] font-black uppercase tracking-widest border border-primary/10">
+              v2.5 Pro
             </div>
             <button 
               onClick={() => setToast({ message: 'Settings coming soon!', type: 'success' })}
-              className="p-2.5 hover:bg-slate-100 rounded-xl text-slate-500 transition-all"
+              className="p-2 hover:bg-slate-100 rounded-lg text-slate-500 transition-all"
             >
-              <Settings2 size={20} />
+              <Settings2 size={18} />
             </button>
           </div>
         </div>
@@ -1299,33 +1299,33 @@ const App: React.FC = () => {
         <motion.aside 
           initial={false}
           animate={{ 
-            width: isSidebarOpen ? (window.innerWidth < 768 ? '100%' : 288) : 0,
-            x: isSidebarOpen ? 0 : (window.innerWidth < 768 ? -300 : 0)
+            width: isSidebarOpen ? (window.innerWidth < 768 ? '100%' : 260) : 0,
+            x: isSidebarOpen ? 0 : (window.innerWidth < 768 ? -260 : 0)
           }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className={`bg-white border-r border-slate-200 flex flex-col fixed md:relative z-[60] md:z-40 h-full shadow-2xl md:shadow-none overflow-hidden max-w-[320px] md:max-w-none`}
+          className={`bg-white border-r border-slate-200 flex flex-col fixed md:relative z-[60] md:z-40 h-full shadow-2xl md:shadow-none overflow-hidden max-w-[280px] md:max-w-none`}
         >
-          <div className="flex items-center justify-between p-6 border-b border-slate-100 md:hidden">
+          <div className="flex items-center justify-between p-4 border-b border-slate-100 md:hidden">
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
-                <Database className="text-white w-4.5 h-4.5" />
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Database className="text-white w-4 h-4" />
               </div>
-              <span className="text-xl font-black text-dark font-display">QuestAI</span>
+              <span className="text-lg font-black text-dark font-display">QuestAI</span>
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}
-              className="p-2.5 hover:bg-slate-100 rounded-xl text-slate-400 transition-all"
+              className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 transition-all"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
 
-          <div className="flex flex-col gap-1.5 p-4 border-b border-slate-100">
+          <div className="flex flex-col gap-1 p-3 border-b border-slate-100">
             {[
-              { id: 'extraction', icon: <UploadCloud size={18} />, label: 'Extraction' },
-              { id: 'bank', icon: <Database size={18} />, label: 'Question Bank' },
-              { id: 'sets', icon: <Layers size={18} />, label: 'Sets' },
-              { id: 'ai-generator', icon: <Sparkles size={18} />, label: 'AI Generator' }
+              { id: 'extraction', icon: <UploadCloud size={16} />, label: 'Extraction' },
+              { id: 'bank', icon: <Database size={16} />, label: 'Question Bank' },
+              { id: 'sets', icon: <Layers size={16} />, label: 'Sets' },
+              { id: 'ai-generator', icon: <Sparkles size={16} />, label: 'AI Generator' }
             ].map((item, index) => (
               <motion.button 
                 key={item.id}
@@ -1333,9 +1333,9 @@ const App: React.FC = () => {
                 animate={isSidebarOpen ? { x: 0, opacity: 1 } : { x: -20, opacity: 0 }}
                 transition={{ delay: index * 0.05 + 0.2 }}
                 onClick={() => { setCurrentView(item.id as any); closeSidebarOnMobile(); }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-black text-sm transition-all group relative overflow-hidden ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-xl font-bold text-xs transition-all group relative overflow-hidden ${
                   currentView === item.id 
-                    ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                    ? 'bg-primary text-white shadow-md shadow-primary/10' 
                     : 'text-slate-500 hover:bg-slate-50'
                 }`}
               >
@@ -1353,29 +1353,29 @@ const App: React.FC = () => {
               </motion.button>
             ))}
           </div>
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Documents</h3>
+          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">Documents</h3>
             <button 
               onClick={() => { setShowUploadModal(true); closeSidebarOnMobile(); }}
-              className="p-2 bg-primary/10 text-primary rounded-xl hover:bg-primary hover:text-white transition-all transform hover:rotate-90"
+              className="p-1.5 bg-primary/10 text-primary rounded-lg hover:bg-primary hover:text-white transition-all transform hover:rotate-90"
               title="Upload PDF"
             >
-              <Plus size={16} />
+              <Plus size={14} />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
             <AnimatePresence mode="popLayout">
               {(documents || []).length === 0 ? (
                 <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4 opacity-40"
+                  className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3 opacity-30"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
-                    <FolderIcon size={24} />
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
+                    <FolderIcon size={20} />
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No History</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Empty</p>
                 </motion.div>
               ) : (
                 (documents || []).map((doc, index) => (
@@ -1386,7 +1386,7 @@ const App: React.FC = () => {
                     transition={{ delay: index * 0.03 + 0.4 }}
                     layout
                     onClick={() => handleExtractFromDoc(doc)}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer group relative ${
+                    className={`p-3 rounded-xl border transition-all cursor-pointer group relative ${
                       activeDocumentId === doc.id 
                         ? 'bg-primary/5 border-primary/20 shadow-sm' 
                         : 'bg-white border-slate-100 hover:border-primary/20 hover:shadow-sm'
@@ -1394,58 +1394,58 @@ const App: React.FC = () => {
                   >
                     <button 
                       onClick={(e) => handleDeleteDoc(doc.id, e)}
-                      className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      className="absolute top-1.5 right-1.5 p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                     >
-                      <X size={14} />
+                      <X size={12} />
                     </button>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                         doc.status === 'idle' ? 'bg-blue-50 text-blue-500' : 
                         doc.status === 'processed' ? 'bg-emerald-50 text-emerald-500' :
                         doc.status === 'error' ? 'bg-red-50 text-red-500' : 'bg-slate-50 text-slate-400'
                       }`}>
-                        {doc.status === 'idle' ? <FolderIcon size={20} /> : <FileText size={20} />}
+                        {doc.status === 'idle' ? <FolderIcon size={16} /> : <FileText size={16} />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-dark text-sm truncate">{doc.name}</h4>
-                        <p className="text-[10px] text-slate-400 font-medium">{doc.createdAt}</p>
+                        <h4 className="font-bold text-dark text-xs truncate leading-tight">{doc.name}</h4>
+                        <p className="text-[9px] text-slate-400 font-medium">{doc.createdAt}</p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1">
                         {doc.status === 'processed' ? (
-                          <span className="text-[9px] font-black uppercase text-emerald-500">Processed</span>
+                          <span className="text-[8px] font-black uppercase text-emerald-500">Done</span>
                         ) : doc.status === 'processing' ? (
-                          <span className="text-[9px] font-black uppercase text-blue-500 flex items-center gap-1">
-                            <Loader2 size={10} className="animate-spin" /> Processing
+                          <span className="text-[8px] font-black uppercase text-blue-500 flex items-center gap-1">
+                            <Loader2 size={8} className="animate-spin" /> ...
                           </span>
                         ) : doc.status === 'error' ? (
-                          <span className="text-[9px] font-black uppercase text-red-500">Error</span>
+                          <span className="text-[8px] font-black uppercase text-red-500">Err</span>
                         ) : (
-                          <span className="text-[9px] font-black uppercase text-slate-400">Idle</span>
+                          <span className="text-[8px] font-black uppercase text-slate-400">Idle</span>
                         )}
                       </div>
-                      <span className="text-[9px] font-bold text-slate-400">{doc.questionsCount} Qs</span>
+                      <span className="text-[8px] font-bold text-slate-400">{doc.questionsCount} Qs</span>
                     </div>
                   </motion.div>
                 ))
               )}
             </AnimatePresence>
           </div>
-          <div className="p-4 border-t border-slate-100">
+          <div className="p-3 border-t border-slate-100">
             <button 
               onClick={() => setToast({ message: 'Folder management coming soon!', type: 'success' })}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-[11px] font-black uppercase text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[10px] font-black uppercase text-slate-500 hover:bg-slate-50 rounded-lg transition-all"
             >
-              <Plus size={14} /> New Folder
+              <Plus size={12} /> New Folder
             </button>
           </div>
         </motion.aside>
 
         <main className="flex-1 overflow-hidden bg-slate-50 relative">
           {/* Subtle Background Pattern */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.03]" 
-               style={{ backgroundImage: 'radial-gradient(#FF4D00 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }} />
+          <div className="absolute inset-0 pointer-events-none opacity-[0.04]" 
+               style={{ backgroundImage: 'radial-gradient(#EB700B 0.5px, transparent 0.5px)', backgroundSize: '20px 20px' }} />
           
           <AnimatePresence mode="wait">
             <motion.div

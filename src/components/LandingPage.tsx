@@ -15,7 +15,9 @@ import {
   Play,
   Star,
   Users,
-  Cpu
+  Cpu,
+  Smartphone,
+  Download
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -41,90 +43,91 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   return (
     <div className="min-h-screen bg-white text-slate-900 overflow-hidden font-sans">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 py-2">
+        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
           <motion.div 
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-2"
           >
-            <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center shadow-md shadow-primary/20 rotate-3 hover:rotate-0 transition-transform duration-300">
-              <Database className="text-white w-3.5 h-3.5" />
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
+              <Database className="text-white w-4 h-4" />
             </div>
-            <span className="text-lg font-black tracking-tighter">
+            <span className="text-xl font-black tracking-tight">
               Quest<span className="text-primary">AI</span>
             </span>
           </motion.div>
           
-          <div className="hidden md:flex items-center gap-6 text-[9px] font-black uppercase tracking-[0.15em] text-slate-400">
+          <div className="hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
             <a href="#features" className="hover:text-primary transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-primary transition-colors">How it Works</a>
-            <a href="#testimonials" className="hover:text-primary transition-colors">Success Stories</a>
           </div>
 
           <motion.button 
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={onStart}
-            className="px-4 py-1.5 bg-slate-900 text-white text-[9px] font-black uppercase tracking-[0.15em] rounded-lg hover:bg-primary transition-all shadow-lg shadow-slate-900/10"
+            className="px-4 py-1.5 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-lg shadow-primary/20 hover:bg-dark transition-all"
           >
-            Launch App
+            Get Started
           </motion.button>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-8 px-4 relative">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full -z-10">
-          <div className="absolute top-10 left-10 w-[300px] h-[300px] bg-primary/5 rounded-full blur-[80px] animate-pulse" />
-          <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[80px] animate-pulse delay-1000" />
+      <section className="pt-24 pb-12 px-4 relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-40">
+          <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-2/20 rounded-full blur-3xl animate-pulse delay-700" />
         </div>
 
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
+            className="space-y-6"
           >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-full mb-4">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-              <span className="text-[8px] font-black uppercase tracking-[0.15em] text-slate-500">
-                v2.0 Now Live with Gemini 2.0
+            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full shadow-sm">
+              <span className="w-2 h-2 bg-primary rounded-full animate-ping" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                AI-Powered Question Engine
               </span>
             </motion.div>
 
             <motion.h1 
               variants={itemVariants}
-              className="text-4xl md:text-[56px] font-black text-slate-900 leading-[0.95] tracking-tighter mb-3"
+              className="text-4xl md:text-6xl font-black text-dark tracking-tighter leading-[0.9] md:leading-[0.85]"
             >
-              Extract <span className="text-primary">Questions</span> <br />
-              With <span className="italic font-serif font-light text-slate-400">Precision</span>
+              Transform Your <span className="text-primary">PDFs</span> into <span className="relative inline-block">
+                Smart
+                <svg className="absolute -bottom-1 left-0 w-full h-2 text-primary/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                  <path d="M0 5 Q 25 0, 50 5 T 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
+                </svg>
+              </span> Questions
             </motion.h1>
 
             <motion.p 
               variants={itemVariants}
-              className="text-sm text-slate-500 font-medium max-w-lg mx-auto mb-6 leading-relaxed"
+              className="text-sm md:text-lg text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed"
             >
-              The enterprise-grade solution for educational content creators. 
-              Convert complex PDFs into structured question banks in seconds.
+              The most advanced AI platform for educators and students to extract, generate, and manage question banks from any document in seconds.
             </motion.p>
 
             <motion.div 
               variants={itemVariants}
-              className="flex flex-col sm:flex-row items-center justify-center gap-3"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4"
             >
               <button 
                 onClick={onStart}
-                className="group px-6 py-3 bg-primary text-white font-black uppercase tracking-[0.15em] text-[9px] rounded-lg hover:bg-slate-900 transition-all shadow-lg shadow-primary/30 flex items-center gap-2"
+                className="w-full sm:w-auto px-8 py-3 bg-primary text-white rounded-xl font-black shadow-xl shadow-primary/25 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
               >
-                Start Extracting <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                Start Creating Free <ArrowRight size={18} />
               </button>
-              <button className="px-6 py-3 bg-white border-2 border-slate-100 text-slate-900 font-black uppercase tracking-[0.15em] text-[9px] rounded-lg hover:border-primary hover:text-primary transition-all flex items-center gap-2">
-                <Play size={12} className="fill-current" /> Watch Demo
+              <button className="w-full sm:w-auto px-8 py-3 bg-white text-dark border border-slate-200 rounded-xl font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                <Play size={14} className="fill-current" /> Watch Demo
               </button>
             </motion.div>
           </motion.div>
@@ -206,77 +209,57 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-16">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-end justify-between mb-12 gap-4">
-            <div className="max-w-lg">
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none mb-3">
-                Engineered for <br />
-                <span className="text-primary">Excellence.</span>
-              </h2>
-              <p className="text-xs text-slate-500 font-medium">
-                Our platform combines cutting-edge AI with intuitive design to give you 
-                the most powerful question management tool ever built.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <div className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400">
-                <Star size={14} />
-              </div>
-              <div className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400">
-                <Star size={14} />
-              </div>
-            </div>
+      {/* Features Grid */}
+      <section className="py-16 px-4 bg-white border-y border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12 space-y-2">
+            <h2 className="text-3xl font-black text-dark tracking-tight">Powerful Features</h2>
+            <p className="text-slate-500 text-sm font-medium">Everything you need to build the perfect question bank.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: <Cpu className="text-primary" size={16} />,
-                title: "Gemini Vision Core",
-                desc: "Powered by Google's latest multimodal models for unparalleled extraction accuracy."
+                icon: <Zap className="text-primary" />,
+                title: 'Instant Extraction',
+                desc: 'Upload any PDF and watch our AI extract questions, options, and answers with 99% accuracy.'
               },
               {
-                icon: <Layers className="text-indigo-500" size={16} />,
-                title: "Smart Categorization",
-                desc: "Automatically tags and organizes questions by subject, difficulty, and topic."
+                icon: <Sparkles className="text-accent-2" />,
+                title: 'AI Generation',
+                desc: 'Generate new questions based on your content. Customize difficulty, topics, and question types.'
               },
               {
-                icon: <Shield className="text-emerald-500" size={16} />,
-                title: "Enterprise Security",
-                desc: "Your data is encrypted and protected with industry-leading security protocols."
+                icon: <Layers className="text-accent-3" />,
+                title: 'Smart Organization',
+                desc: 'Organize questions into sets, apply bulk tags, and manage your bank with powerful filters.'
               },
               {
-                icon: <Globe className="text-amber-500" size={16} />,
-                title: "Multilingual Support",
-                desc: "Extract questions in over 50 languages with perfect character recognition."
+                icon: <Download className="text-emerald-500" />,
+                title: 'Multi-Format Export',
+                desc: 'Export your question sets to PDF, Word, or CSV formats with professional formatting.'
               },
               {
-                icon: <Zap className="text-orange-500" size={16} />,
-                title: "Instant Processing",
-                desc: "Process hundreds of pages in minutes, not hours. Scale your content effortlessly."
+                icon: <Shield className="text-blue-500" />,
+                title: 'Secure Storage',
+                desc: 'Your documents and questions are stored securely. Access them anytime, from any device.'
               },
               {
-                icon: <Users className="text-rose-500" size={16} />,
-                title: "Team Collaboration",
-                desc: "Share question banks and collaborate with your team in real-time."
+                icon: <Smartphone className="text-purple-500" />,
+                title: 'Mobile Ready',
+                desc: 'Access your question bank on the go. Perfectly optimized for mobile and tablet devices.'
               }
             ].map((feature, i) => (
-              <motion.div
+              <motion.div 
                 key={i}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                whileHover={{ y: -4 }}
-                className="group p-5 rounded-[20px] bg-white border border-slate-100 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                whileHover={{ y: -5 }}
+                className="p-6 bg-slate-50 border border-slate-100 rounded-3xl space-y-4 group transition-all"
               >
-                <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                   {feature.icon}
                 </div>
-                <h3 className="text-base font-black text-slate-900 mb-1.5 tracking-tight">{feature.title}</h3>
-                <p className="text-[10px] text-slate-500 font-medium leading-relaxed">{feature.desc}</p>
+                <h3 className="text-lg font-black text-dark">{feature.title}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed font-medium">{feature.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -285,38 +268,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
       {/* CTA Section */}
       <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-slate-900 rounded-[32px] p-8 md:p-12 relative overflow-hidden text-center">
-            <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
-              <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-primary rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
-            </div>
-            
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
-              className="relative z-10"
+        <div className="max-w-5xl mx-auto bg-primary rounded-[3rem] p-8 md:p-16 text-center relative overflow-hidden shadow-2xl shadow-primary/30">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
+          
+          <div className="relative z-10 space-y-6">
+            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">Ready to build your bank?</h2>
+            <p className="text-white/80 text-sm md:text-lg max-w-xl mx-auto font-medium">Join thousands of educators who are saving hours every week with QuestAI.</p>
+            <button 
+              onClick={onStart}
+              className="px-10 py-4 bg-white text-primary rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition-all"
             >
-              <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter leading-[0.9] mb-4">
-                The Future of <br />
-                <span className="text-primary italic">Education</span> is Here.
-              </h2>
-              <p className="text-xs text-white/50 font-medium max-w-lg mx-auto mb-8">
-                Join 50,000+ educators who are already using QuestAI to build the next generation of learning tools.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button 
-                  onClick={onStart}
-                  className="px-6 py-3 bg-primary text-white font-black uppercase tracking-[0.15em] text-[9px] rounded-lg hover:bg-white hover:text-slate-900 transition-all shadow-lg shadow-primary/20"
-                >
-                  Get Started Now
-                </button>
-                <button className="px-6 py-3 bg-transparent border-2 border-white/10 text-white font-black uppercase tracking-[0.15em] text-[9px] rounded-lg hover:bg-white/5 transition-all">
-                  Contact Sales
-                </button>
-              </div>
-            </motion.div>
+              Get Started for Free
+            </button>
           </div>
         </div>
       </section>
