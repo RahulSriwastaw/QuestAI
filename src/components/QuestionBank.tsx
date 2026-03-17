@@ -21,7 +21,10 @@ import {
   Lock,
   LayoutGrid,
   Tag,
-  UploadCloud
+  UploadCloud,
+  Database,
+  Sparkles,
+  Layers
 } from 'lucide-react';
 import QuestionCard from './QuestionCard';
 import BulkAIEditModal from './BulkAIEditModal';
@@ -250,129 +253,193 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-slate-50">
+    <div className="flex-1 flex flex-col h-full bg-slate-50/50">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 p-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-2">
-          <div>
-            <h2 className="text-sm font-black text-dark font-display">Question Bank</h2>
-            <p className="text-[10px] text-slate-400 font-medium">Manage and organize your questions</p>
-          </div>
-          <div className="flex bg-slate-100 p-1 rounded-xl self-start">
-            <button 
-              onClick={() => setActiveTab('bulk')}
-              className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${activeTab === 'bulk' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
-            >
-              Bulk
-            </button>
-            <button 
-              onClick={() => setActiveTab('documents')}
-              className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${activeTab === 'documents' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-dark'}`}
-            >
-              Docs
-            </button>
-          </div>
-        </div>
-        
-        {/* Actions Bar */}
-        <div className="flex flex-wrap gap-2 mb-2">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept=".csv, text/csv, application/csv" 
-            className="hidden" 
-          />
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm"
-          >
-            <FileCode size={12} className="text-primary" /> Import
-          </button>
-          <button 
-            onClick={() => setShowNewFolderModal(true)}
-            className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm"
-          >
-            <FolderIcon size={12} className="text-primary" /> New Folder
-          </button>
-          {selectedQuestionIds.size > 0 && (
-            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-100 p-4 sticky top-0 z-40">
+        <div className="max-w-[1600px] mx-auto space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary rotate-3">
+                <Database size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-dark font-display tracking-tight">Question Bank</h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Enterprise Repository</span>
+                  <div className="w-1 h-1 rounded-full bg-slate-300" />
+                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{allQuestions.length} Items</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex bg-slate-100/80 p-1 rounded-2xl self-start backdrop-blur-sm border border-slate-200/50">
               <button 
-                onClick={() => onBulkDelete(Array.from(selectedQuestionIds))}
-                className="px-3 py-1.5 bg-red-500 text-white text-[10px] font-black uppercase rounded-lg hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all flex items-center gap-1.5"
+                onClick={() => setActiveTab('bulk')}
+                className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${activeTab === 'bulk' ? 'bg-white text-primary shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 'text-slate-500 hover:text-dark'}`}
               >
-                <Trash2 size={12} /> Delete ({selectedQuestionIds.size})
+                Bulk View
               </button>
               <button 
-                onClick={() => setShowBulkAIEditModal(true)}
-                className="px-3 py-1.5 bg-accent-2 text-white text-[10px] font-black uppercase rounded-lg hover:opacity-90 shadow-lg shadow-accent-2/20 transition-all flex items-center gap-1.5"
+                onClick={() => setActiveTab('documents')}
+                className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${activeTab === 'documents' ? 'bg-white text-primary shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 'text-slate-500 hover:text-dark'}`}
               >
-                <Edit2 size={12} /> AI Edit
-              </button>
-              <button 
-                onClick={() => setShowBulkTagModal(true)}
-                className="px-3 py-1.5 bg-accent-3 text-white text-[10px] font-black uppercase rounded-lg hover:opacity-90 shadow-lg shadow-accent-3/20 transition-all flex items-center gap-1.5"
-              >
-                <Tag size={12} /> Bulk Tag
-              </button>
-              <button 
-                onClick={() => setShowCreateSetModal(true)}
-                className="px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-black uppercase rounded-lg hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-1.5"
-              >
-                <CheckSquare size={12} /> Create Set
+                Document View
               </button>
             </div>
-          )}
-        </div>
-
-        {/* Search and Filter */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search questions..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:ring-primary focus:border-primary transition-all font-medium"
-            />
           </div>
-          <select
-            value={selectedExam}
-            onChange={(e) => setSelectedExam(e.target.value)}
-            className="px-3 py-2 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
-          >
-            {exams.map(exam => <option key={exam} value={exam}>{exam}</option>)}
-          </select>
-          <select
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-            className="px-3 py-2 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
-          >
-            {subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}
-          </select>
-          <button 
-            onClick={() => setViewMode(prev => prev === 'grid' ? 'list' : prev === 'list' ? 'table' : 'grid')}
-            className="px-3 py-2 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase rounded-lg hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-sm"
-          >
-            <LayoutGrid size={12} className="text-primary" /> {viewMode === 'grid' ? 'List' : viewMode === 'list' ? 'Table' : 'Grid'}
-          </button>
-          <div className="relative">
-            <button 
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              disabled={currentQuestions.length === 0}
-              className="px-4 py-2 bg-primary text-white text-[10px] font-black uppercase rounded-lg hover:opacity-90 shadow-lg shadow-primary/20 transition-all flex items-center gap-1.5 disabled:opacity-50"
-            >
-              <Download size={12} /> Export
-            </button>
-            {showExportMenu && (
-              <div className="absolute right-0 top-full mt-2 w-44 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 overflow-hidden p-1">
-                <button onClick={() => navigate('/editor')} className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-slate-600 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">Design Editor</button>
-                <button onClick={() => handleExport('pdf')} className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-slate-600 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">PDF Document</button>
-                <button onClick={() => handleExport('word')} className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-slate-600 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">Word Document</button>
-                <button onClick={() => handleExport('csv')} className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-slate-600 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">CSV</button>
-                <button onClick={() => handleExport('json')} className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-slate-600 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">Custom JSON</button>
-                <button onClick={() => handleExport('txt')} className="w-full text-left px-3 py-2 text-[10px] font-black uppercase text-slate-600 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors">Plain Text</button>
+          
+          {/* Actions Bar */}
+          <div className="flex flex-wrap items-center gap-3">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileChange} 
+              accept=".csv, text/csv, application/csv" 
+              className="hidden" 
+            />
+            <div className="flex items-center gap-2 p-1 bg-slate-50 rounded-2xl border border-slate-100">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 hover:border-primary/30 transition-all flex items-center gap-2 shadow-sm group"
+              >
+                <UploadCloud size={14} className="text-primary group-hover:scale-110 transition-transform" /> Import CSV
+              </button>
+              <button 
+                onClick={() => setShowNewFolderModal(true)}
+                className="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 hover:border-primary/30 transition-all flex items-center gap-2 shadow-sm group"
+              >
+                <FolderIcon size={14} className="text-primary group-hover:scale-110 transition-transform" /> New Folder
+              </button>
+            </div>
+
+            <div className="h-8 w-[1px] bg-slate-200 mx-2 hidden md:block" />
+
+            {selectedQuestionIds.size > 0 ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-wrap items-center gap-2 p-1 bg-primary/5 rounded-2xl border border-primary/10"
+              >
+                <button 
+                  onClick={() => onBulkDelete(Array.from(selectedQuestionIds))}
+                  className="px-4 py-2.5 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all flex items-center gap-2"
+                >
+                  <Trash2 size={14} /> Delete ({selectedQuestionIds.size})
+                </button>
+                <button 
+                  onClick={() => setShowBulkAIEditModal(true)}
+                  className="px-4 py-2.5 bg-accent-2 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 shadow-lg shadow-accent-2/20 transition-all flex items-center gap-2"
+                >
+                  <Sparkles size={14} /> AI Refine
+                </button>
+                <button 
+                  onClick={() => setShowBulkTagModal(true)}
+                  className="px-4 py-2.5 bg-accent-3 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 shadow-lg shadow-accent-3/20 transition-all flex items-center gap-2"
+                >
+                  <Tag size={14} /> Bulk Tag
+                </button>
+                <button 
+                  onClick={() => setShowCreateSetModal(true)}
+                  className="px-4 py-2.5 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2"
+                >
+                  <CheckSquare size={14} /> Create Set
+                </button>
+                <button 
+                  onClick={() => setSelectedQuestionIds(new Set())}
+                  className="p-2.5 text-primary hover:bg-primary/10 rounded-xl transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </motion.div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-3 flex-1">
+                <div className="relative flex-1 max-w-md group">
+                  <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
+                  <input 
+                    type="text" 
+                    placeholder="Search your intelligence bank..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium placeholder:text-slate-400"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <select
+                    value={selectedExam}
+                    onChange={(e) => setSelectedExam(e.target.value)}
+                    className="pl-4 pr-10 py-3 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-50 hover:border-primary/30 transition-all shadow-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22currentColor%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px_16px] bg-[right_12px_center] bg-no-repeat"
+                  >
+                    {exams.map(exam => <option key={exam} value={exam}>{exam}</option>)}
+                  </select>
+                  <select
+                    value={selectedSubject}
+                    onChange={(e) => setSelectedSubject(e.target.value)}
+                    className="pl-4 pr-10 py-3 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-50 hover:border-primary/30 transition-all shadow-sm cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22currentColor%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px_16px] bg-[right_12px_center] bg-no-repeat"
+                  >
+                    {subjects.map(subject => <option key={subject} value={subject}>{subject}</option>)}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl border border-slate-200">
+                  <button 
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2.5 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <LayoutGrid size={16} />
+                  </button>
+                  <button 
+                    onClick={() => setViewMode('list')}
+                    className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <Layers size={16} />
+                  </button>
+                  <button 
+                    onClick={() => setViewMode('table')}
+                    className={`p-2.5 rounded-xl transition-all ${viewMode === 'table' ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <FileText size={16} />
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowExportMenu(!showExportMenu)}
+                    disabled={currentQuestions.length === 0}
+                    className="px-6 py-3 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:opacity-90 shadow-xl shadow-primary/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none"
+                  >
+                    <Download size={14} /> Export
+                  </button>
+                  <AnimatePresence>
+                    {showExportMenu && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 top-full mt-3 w-56 bg-white border border-slate-100 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 overflow-hidden p-2"
+                      >
+                        <div className="px-4 py-3 border-b border-slate-50 mb-1">
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Export Options</span>
+                        </div>
+                        <button onClick={() => navigate('/editor')} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-primary/5 hover:text-primary rounded-2xl transition-all flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center"><Sparkles size={12} /></div> Design Editor
+                        </button>
+                        <button onClick={() => handleExport('pdf')} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-primary/5 hover:text-primary rounded-2xl transition-all flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-lg bg-red-50 flex items-center justify-center"><FileText size={12} className="text-red-500" /></div> PDF Document
+                        </button>
+                        <button onClick={() => handleExport('word')} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-primary/5 hover:text-primary rounded-2xl transition-all flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center"><FileText size={12} className="text-blue-500" /></div> Word Document
+                        </button>
+                        <button onClick={() => handleExport('csv')} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-primary/5 hover:text-primary rounded-2xl transition-all flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center"><FileCode size={12} className="text-emerald-500" /></div> CSV Data
+                        </button>
+                        <button onClick={() => handleExport('json')} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-primary/5 hover:text-primary rounded-2xl transition-all flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-lg bg-amber-50 flex items-center justify-center"><FileJson size={12} className="text-amber-500" /></div> Custom JSON
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             )}
           </div>
@@ -380,18 +447,18 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
       </div>
 
       {/* Breadcrumbs */}
-      <div className="px-4 py-2 bg-slate-100/50 border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto">
+      <div className="px-8 py-3 bg-white/50 border-b border-slate-100 flex items-center gap-2 overflow-x-auto scrollbar-hide">
         {getBreadcrumbs().map((crumb, index, array) => (
           <React.Fragment key={crumb.id || 'root'}>
             <button 
               onClick={() => onFolderChange(crumb.id)}
-              className={`text-[10px] font-bold whitespace-nowrap transition-colors ${
-                index === array.length - 1 ? 'text-dark' : 'text-slate-400 hover:text-primary'
+              className={`text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all px-3 py-1.5 rounded-xl ${
+                index === array.length - 1 ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:text-dark hover:bg-slate-100'
               }`}
             >
               {crumb.name}
             </button>
-            {index < array.length - 1 && <ChevronRight size={12} className="text-slate-300" />}
+            {index < array.length - 1 && <ChevronRight size={14} className="text-slate-300 shrink-0" />}
           </React.Fragment>
         ))}
       </div>
@@ -437,22 +504,25 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
             {activeTab === 'bulk' ? (
               allQuestions.length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">All Questions</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="space-y-1">
+                      <h3 className="text-xs font-black text-dark uppercase tracking-[0.2em]">Intelligence Bank</h3>
+                      <p className="text-[10px] font-medium text-slate-400">Showing {paginatedQuestions.length} of {allQuestions.length} questions</p>
+                    </div>
                     <button 
                       onClick={selectAllQuestions}
-                      className="text-[10px] font-black uppercase text-primary hover:text-secondary transition-colors flex items-center gap-1"
+                      className="px-4 py-2 bg-white border border-slate-200 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 hover:border-primary/30 rounded-xl transition-all flex items-center gap-2 shadow-sm"
                     >
                       {selectedQuestionIds.size === allQuestions.length ? (
-                        <><CheckSquare size={12} /> Deselect All</>
+                        <><CheckSquare size={14} /> Deselect All</>
                       ) : (
-                        <><Square size={12} /> Select All</>
+                        <><Square size={14} /> Select All</>
                       )}
                     </button>
                   </div>
                   <motion.div 
                     layout
-                    className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" : viewMode === 'list' ? "space-y-2" : ""}
+                    className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : viewMode === 'list' ? "space-y-3" : ""}
                   >
                     {viewMode === 'table' ? renderTableView() : (
                       <AnimatePresence mode="popLayout">

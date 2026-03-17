@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Sparkles, FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, 
   Maximize, Download, Printer, Save, Image as ImageIcon, Trash2, GripVertical,
-  Bold, Italic, Underline, Strikethrough, Superscript, Subscript, List, ListOrdered, Table, Sigma
+  Bold, Italic, Underline, Strikethrough, Superscript, Subscript, List, ListOrdered, Table, Sigma,
+  Loader2, Plus, ArrowLeft, ArrowRight, ChevronDown
 } from 'lucide-react';
 import { Question } from '../types';
 
@@ -64,199 +66,201 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex bg-black bg-opacity-50 backdrop-blur-sm">
-      <div className="flex flex-col w-full h-full max-w-7xl mx-auto bg-slate-50 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex bg-dark/60 backdrop-blur-md p-4 md:p-8 animate-in fade-in duration-300">
+      <div className="flex flex-col w-full h-full max-w-7xl mx-auto bg-slate-50 rounded-[3rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] overflow-hidden animate-in zoom-in-95 duration-300">
         
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-3 py-2 bg-white border-b border-slate-200 shrink-0 gap-2">
-          <div className="flex items-center justify-between w-full md:w-auto">
-            <h2 className="text-base font-bold text-slate-800 flex items-center gap-1.5">
-              {isDirty && <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>}
-              Edit Q#{question.question_number}
-            </h2>
-            <button onClick={onClose} className="md:hidden p-1.5 text-slate-400 hover:text-slate-600">
-              <X size={16} />
-            </button>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-8 py-6 bg-white border-b border-slate-100 shrink-0 gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/5">
+              <FileText size={24} />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-dark flex items-center gap-2 font-display tracking-tight">
+                Intelligence Refinement
+                {isDirty && <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />}
+              </h2>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Question Unit #{question.question_number}</p>
+            </div>
           </div>
           
-          <div className="flex flex-wrap items-center gap-1.5 md:border-l md:border-slate-200 md:pl-3">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-medium text-slate-500">Status:</span>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
               <button 
                 onClick={() => {
                   setStatus(s => s === 'draft' ? 'published' : 'draft');
                   setIsDirty(true);
                 }}
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors ${
+                className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
                   status === 'draft' 
-                    ? 'bg-yellow-50 text-yellow-700 border-yellow-200' 
-                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    ? 'bg-amber-50 text-amber-600 border-amber-200' 
+                    : 'bg-emerald-50 text-emerald-600 border-emerald-200'
                 }`}
               >
-                {status === 'draft' ? 'Draft' : 'Published'}
+                {status === 'draft' ? 'Draft' : 'Active'}
               </button>
             </div>
 
-            <select 
-              value={subject} 
-              onChange={(e) => { setSubject(e.target.value); setIsDirty(true); }}
-              className="text-[10px] border border-slate-200 rounded px-1.5 py-1 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Subject...</option>
-              <option value="physics">Physics</option>
-              <option value="chemistry">Chemistry</option>
-              <option value="math">Mathematics</option>
-              <option value="biology">Biology</option>
-            </select>
+            <div className="flex items-center gap-2">
+              <select 
+                value={subject} 
+                onChange={(e) => { setSubject(e.target.value); setIsDirty(true); }}
+                className="text-[10px] font-black uppercase tracking-widest border border-slate-200 rounded-xl px-4 py-2 bg-white focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+              >
+                <option value="">Subject...</option>
+                <option value="physics">Physics</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="math">Mathematics</option>
+                <option value="biology">Biology</option>
+              </select>
 
-            <select 
-              value={difficulty} 
-              onChange={(e) => { setDifficulty(e.target.value as any); setIsDirty(true); }}
-              className="text-[10px] border border-slate-200 rounded px-1.5 py-1 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Difficulty...</option>
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-              <option value="very_hard">Very Hard</option>
-            </select>
-          </div>
+              <select 
+                value={difficulty} 
+                onChange={(e) => { setDifficulty(e.target.value as any); setIsDirty(true); }}
+                className="text-[10px] font-black uppercase tracking-widest border border-slate-200 rounded-xl px-4 py-2 bg-white focus:ring-4 focus:ring-primary/10 transition-all outline-none"
+              >
+                <option value="">Difficulty...</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+                <option value="very_hard">Very Hard</option>
+              </select>
+            </div>
 
-          <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3">
-            <select 
-              value={questionType} 
-              onChange={(e) => { setQuestionType(e.target.value); setIsDirty(true); }}
-              className="text-[10px] border border-slate-200 rounded px-1.5 py-1 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="mcq_single">MCQ Single</option>
-              <option value="mcq_multiple">MCQ Multiple</option>
-              <option value="integer">Integer Type</option>
-              <option value="true_false">True/False</option>
-              <option value="fill_blank">Fill in the Blank</option>
-              <option value="assertion_reason">Assertion-Reason</option>
-              <option value="match_column">Match the Column</option>
-              <option value="numerical">Numerical Value</option>
-            </select>
-          </div>
+            <div className="h-8 w-px bg-slate-100 mx-2 hidden md:block" />
 
-          <div className="flex items-center gap-2">
-            {!isDirty && <span className="text-[10px] text-orange-500 font-medium">Make changes to enable save</span>}
-            <button 
-              onClick={handleSave}
-              disabled={!isDirty || isSaving}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold transition-all ${
-                isDirty && !isSaving
-                  ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm' 
-                  : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-              }`}
-            >
-              {isSaving ? (
-                <><div className="w-3 h-3 border-2 border-white border-opacity-30 border-t-white rounded-full animate-spin" /> Saving...</>
-              ) : (
-                <><Save size={14} /> Save Changes</>
-              )}
-            </button>
-            <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
-              <X size={16} />
-            </button>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={handleSave}
+                disabled={!isDirty || isSaving}
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl ${
+                  isDirty && !isSaving
+                    ? 'bg-primary text-white hover:opacity-90 shadow-primary/20' 
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                }`}
+              >
+                {isSaving ? (
+                  <><Loader2 className="animate-spin" size={16} /> Syncing...</>
+                ) : (
+                  <><Save size={16} /> Commit Changes</>
+                )}
+              </button>
+              <button onClick={onClose} className="p-3 text-slate-400 hover:text-dark hover:bg-slate-100 rounded-2xl transition-all">
+                <X size={24} />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center px-3 bg-white border-b border-slate-200 shrink-0">
+        {/* Tabs */}
+        <div className="flex items-center px-8 bg-white border-b border-slate-100 shrink-0 gap-8">
           <button 
             onClick={() => setActiveTab('ai')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-b-2 transition-colors ${
-              activeTab === 'ai' ? 'border-purple-500 text-purple-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            className={`flex items-center gap-2 py-4 text-[10px] font-black uppercase tracking-[0.25em] border-b-2 transition-all ${
+              activeTab === 'ai' ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'
             }`}
           >
-            <Sparkles size={14} /> AI Edit
+            <Sparkles size={16} /> Intelligence Assistant
           </button>
           <button 
             onClick={() => setActiveTab('pdf')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-b-2 transition-colors ${
-              activeTab === 'pdf' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            className={`flex items-center gap-2 py-4 text-[10px] font-black uppercase tracking-[0.25em] border-b-2 transition-all ${
+              activeTab === 'pdf' ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'
             }`}
           >
-            <FileText size={14} /> Page {question.page_number}
+            <FileText size={16} /> Source Context (Page {question.page_number})
           </button>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
           
-          <div className="w-1/2 border-r border-slate-200 bg-slate-100 flex flex-col overflow-hidden">
+          {/* Left Panel: Context/AI */}
+          <div className="w-1/2 border-r border-slate-100 bg-slate-50/50 flex flex-col overflow-hidden">
             {activeTab === 'pdf' ? (
               <>
-                <div className="flex items-center justify-between px-2 py-1.5 bg-white border-b border-slate-200 shrink-0">
-                  <div className="text-[10px] font-medium text-slate-500 flex items-center gap-1.5">
-                    <ChevronLeft size={12} /> Viewing page {question.page_number} of source
+                <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-100 shrink-0">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <ChevronLeft size={14} /> Source Material Fragment
                   </div>
-                  <div className="flex items-center gap-0.5">
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><ZoomOut size={12} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><ZoomIn size={12} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Maximize size={12} /></button>
-                    <div className="w-px h-3 bg-slate-200 mx-0.5"></div>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Download size={12} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"><Printer size={12} /></button>
+                  <div className="flex items-center gap-2">
+                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"><ZoomOut size={18} /></button>
+                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"><ZoomIn size={18} /></button>
+                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"><Maximize size={18} /></button>
+                    <div className="w-px h-6 bg-slate-100 mx-1"></div>
+                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"><Download size={18} /></button>
+                    <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"><Printer size={18} /></button>
                   </div>
                 </div>
-                <div className="flex-1 overflow-auto p-3 flex items-center justify-center relative">
-                  <div className="w-full max-w-lg aspect-square bg-white shadow-sm relative">
-                    <div className="absolute inset-0 flex items-center justify-center text-slate-300 font-medium text-xs">
-                      {pdfUrl ? "PDF Viewer Loading..." : "No PDF Source Available"}
+                <div className="flex-1 overflow-auto p-8 flex items-center justify-center relative">
+                  <div className="w-full max-w-lg aspect-[3/4] bg-white shadow-2xl rounded-[2rem] relative overflow-hidden group">
+                    <div className="absolute inset-0 flex items-center justify-center text-slate-300 font-black uppercase tracking-widest text-[10px]">
+                      {pdfUrl ? "Initializing Source Viewer..." : "No Source Context Available"}
                     </div>
-                    <div className="absolute top-[25%] left-10 right-10 h-24 bg-yellow-400 bg-opacity-20 border-2 border-yellow-400 border-opacity-50 rounded pointer-events-none"></div>
+                    {/* Mock Highlight */}
+                    <div className="absolute top-[25%] left-10 right-10 h-24 bg-primary/10 border-2 border-primary/30 rounded-2xl pointer-events-none animate-pulse"></div>
                   </div>
                 </div>
               </>
             ) : (
-              <div className="p-4 flex flex-col h-full">
-                <h3 className="text-xs font-bold text-slate-800 mb-3 flex items-center gap-1.5">
-                  <Sparkles size={14} className="text-purple-500" /> AI Assistant
-                </h3>
-                <div className="flex-1 bg-white rounded-lg border border-slate-200 p-3 shadow-sm flex flex-col">
-                  <div className="flex-1 overflow-auto space-y-3">
-                    <div className="bg-purple-50 text-purple-800 p-2.5 rounded-md text-xs">
-                      I can help you edit this question. What would you like to do?
+              <div className="p-8 flex flex-col h-full space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                    <Sparkles size={20} />
+                  </div>
+                  <h3 className="text-sm font-black text-dark uppercase tracking-widest">Intelligence Assistant</h3>
+                </div>
+                <div className="flex-1 bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/50 flex flex-col relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+                  
+                  <div className="flex-1 overflow-auto space-y-6 relative z-10">
+                    <div className="bg-primary/5 text-primary p-6 rounded-[1.5rem] text-xs font-bold leading-relaxed border border-primary/10">
+                      I am monitoring your edits. I can assist with rephrasing, logic verification, or multi-language translation. How shall we proceed?
                     </div>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-slate-100">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      <button className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium rounded transition-colors">Rephrase</button>
-                      <button className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium rounded transition-colors">Fix Grammar</button>
-                      <button className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium rounded transition-colors">Translate</button>
-                      <button className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-medium rounded transition-colors">Detect Type</button>
+                  
+                  <div className="mt-6 pt-6 border-t border-slate-50 relative z-10">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {['Rephrase', 'Fix Grammar', 'Translate', 'Detect Type'].map(action => (
+                        <button key={action} className="px-4 py-2 bg-slate-50 hover:bg-primary hover:text-white text-slate-500 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all border border-slate-100">
+                          {action}
+                        </button>
+                      ))}
                     </div>
-                    <input 
-                      type="text" 
-                      placeholder="Ask AI to edit this question..." 
-                      className="w-full px-2.5 py-1.5 border border-slate-200 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
-                    />
+                    <div className="relative">
+                      <input 
+                        type="text" 
+                        placeholder="Command Intelligence Engine..." 
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all pr-12"
+                      />
+                      <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-primary hover:bg-primary/10 rounded-xl transition-all">
+                        <ArrowRight size={20} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="w-1/2 overflow-auto bg-slate-50 p-4">
-            <div className="max-w-2xl mx-auto space-y-4">
+          {/* Right Panel: Editor */}
+          <div className="w-1/2 overflow-auto bg-white p-8 custom-scrollbar">
+            <div className="max-w-2xl mx-auto space-y-8">
               
-              <button className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium text-xs hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all">
-                + Add Passage/Instruction
+              <button className="w-full py-6 border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-black uppercase tracking-[0.2em] text-[10px] hover:border-primary hover:text-primary hover:bg-primary/5 transition-all group">
+                <span className="group-hover:scale-110 inline-block transition-transform">+ Add Passage / Context</span>
               </button>
 
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-3 py-1.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                    QUESTION (ENGLISH)
+              {/* Question Text Editor */}
+              <div className="bg-slate-50/50 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 transition-all">
+                <div className="px-8 py-4 bg-white border-b border-slate-100 flex items-center justify-between">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary" /> Question Fragment (English)
                   </span>
-                  <div className="flex items-center gap-0.5">
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Bold size={12} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Italic size={12} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Underline size={12} /></button>
-                    <div className="w-px h-3 bg-slate-200 mx-0.5"></div>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Superscript size={12} /></button>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Subscript size={12} /></button>
-                    <div className="w-px h-3 bg-slate-200 mx-0.5"></div>
-                    <button className="p-1 text-slate-400 hover:text-slate-700 rounded"><Sigma size={12} /></button>
+                  <div className="flex items-center gap-1">
+                    {[Bold, Italic, Underline, Sigma].map((Icon, idx) => (
+                      <button key={idx} className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"><Icon size={16} /></button>
+                    ))}
                   </div>
                 </div>
                 <textarea
@@ -265,33 +269,34 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                     handleChange('question_eng', e.target.value);
                     if (!editedQuestion.question_hin) handleChange('question_text', e.target.value);
                   }}
-                  className="w-full p-3 min-h-[80px] text-xs text-slate-700 focus:outline-none resize-y"
-                  placeholder="Enter English question text here..."
+                  className="w-full p-8 min-h-[120px] text-sm font-bold text-dark bg-transparent focus:outline-none resize-y leading-relaxed"
+                  placeholder="Initialize English question intelligence..."
                 />
                 
-                <div className="px-3 py-1.5 bg-slate-50 border-y border-slate-200 flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                    QUESTION (HINDI)
+                <div className="px-8 py-4 bg-white border-y border-slate-100 flex items-center justify-between">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-500" /> Question Fragment (Hindi)
                   </span>
                 </div>
                 <textarea
                   value={editedQuestion.question_hin || ''}
                   onChange={(e) => handleChange('question_hin', e.target.value)}
-                  className="w-full p-3 min-h-[80px] text-xs text-slate-700 focus:outline-none resize-y"
-                  placeholder="Enter Hindi question text here..."
+                  className="w-full p-8 min-h-[120px] text-sm font-bold text-dark bg-transparent focus:outline-none resize-y leading-relaxed"
+                  placeholder="Initialize Hindi question intelligence..."
                 />
-                <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-100 text-[9px] text-slate-400 text-right">
-                  {editedQuestion.question_text.length} characters
+                <div className="px-8 py-3 bg-white border-t border-slate-50 text-[9px] font-black uppercase tracking-widest text-slate-300 text-right">
+                  {editedQuestion.question_text.length} Units of Data
                 </div>
               </div>
 
+              {/* Diagram Editor */}
               {editedQuestion.diagram_url ? (
-                <div className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm">
-                  <div className="flex items-start justify-between mb-1.5">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">Attached Image</span>
-                    <div className="flex gap-1.5">
-                      <label className="text-[10px] font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
-                        Edit Image
+                <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/50 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Visual Intelligence Asset</span>
+                    <div className="flex gap-4">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-primary hover:opacity-70 cursor-pointer transition-all">
+                        Replace Asset
                         <input 
                           type="file" 
                           accept="image/*" 
@@ -301,27 +306,29 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                       </label>
                       <button 
                         onClick={() => handleChange('diagram_url', undefined)}
-                        className="text-[10px] font-medium text-red-600 hover:text-red-700"
+                        className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:opacity-70 transition-all"
                       >
-                        Remove
+                        Purge Asset
                       </button>
                     </div>
                   </div>
-                  <div className="bg-slate-100 rounded-md p-1.5 flex justify-center">
-                    <img src={editedQuestion.diagram_url} alt="Question Diagram" className="max-h-32 object-contain rounded" />
+                  <div className="bg-slate-50 rounded-[2rem] p-8 flex justify-center border border-slate-100">
+                    <img src={editedQuestion.diagram_url} alt="Question Diagram" className="max-h-48 object-contain rounded-2xl shadow-lg" />
                   </div>
                   <input 
                     type="text" 
-                    placeholder="Add caption..." 
+                    placeholder="Asset Metadata / Alt Text..." 
                     value={editedQuestion.diagram_alt_text || ''}
                     onChange={(e) => handleChange('diagram_alt_text', e.target.value)}
-                    className="w-full mt-3 px-3 py-1.5 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-primary/10 outline-none transition-all"
                   />
                 </div>
               ) : (
-                <label className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium text-xs hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer">
-                  <ImageIcon size={20} className="text-slate-400" />
-                  Add Image (Optional)
+                <label className="w-full py-10 border-2 border-dashed border-slate-200 rounded-[2.5rem] text-slate-400 font-black uppercase tracking-[0.2em] text-[10px] hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-4 cursor-pointer group">
+                  <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                    <ImageIcon size={24} />
+                  </div>
+                  Attach Visual Intelligence
                   <input 
                     type="file" 
                     accept="image/*" 
@@ -331,41 +338,41 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                 </label>
               )}
 
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
-                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                    OPTIONS
-                  </span>
+              {/* Options Editor */}
+              <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+                <div className="px-8 py-6 bg-slate-50/50 border-b border-slate-100">
+                  <span className="text-[10px] font-black text-dark uppercase tracking-[0.3em]">Response Matrix</span>
                 </div>
-                <div className="p-3 space-y-2">
+                <div className="p-8 space-y-6">
                   {['A', 'B', 'C', 'D'].map((label) => (
-                    <div key={label} className="flex items-start gap-2 group">
-                      <div className="mt-1.5 text-slate-300 cursor-grab hover:text-slate-500"><GripVertical size={14} /></div>
-                      <div className="mt-1.5 font-bold text-slate-500 w-5 text-xs">({label})</div>
-                      <div className="flex-1 relative flex flex-col gap-1.5">
+                    <div key={label} className="flex items-start gap-4 group">
+                      <div className="mt-4 text-slate-200 cursor-grab hover:text-primary transition-colors"><GripVertical size={18} /></div>
+                      <div className="mt-4 font-black text-slate-400 w-8 text-sm">({label})</div>
+                      <div className="flex-1 space-y-3">
                         <textarea
                           value={(editedQuestion.options as any)[label] || ''}
                           onChange={(e) => handleOptionChange(label, e.target.value)}
-                          className="w-full p-1.5 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 resize-none min-h-[32px]"
+                          className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold text-dark focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all resize-none min-h-[56px]"
                           rows={1}
+                          placeholder={`Initialize Response ${label}...`}
                         />
                         {(editedQuestion.options as any)[`${label}_diagram_url`] ? (
-                          <div className="relative inline-block w-max">
+                          <div className="relative inline-block group/img">
                             <img 
                               src={(editedQuestion.options as any)[`${label}_diagram_url`]} 
                               alt={`Option ${label}`} 
-                              className="max-h-20 object-contain rounded border border-slate-200" 
+                              className="max-h-24 object-contain rounded-2xl border border-slate-100 shadow-md" 
                             />
                             <button 
                               onClick={() => handleOptionChange(`${label}_diagram_url`, undefined as any)}
-                              className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 shadow-sm"
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg opacity-0 group-hover/img:opacity-100 transition-all"
                             >
-                              <X size={10} />
+                              <X size={12} />
                             </button>
                           </div>
                         ) : (
-                          <label className="text-[10px] text-blue-500 hover:text-blue-600 cursor-pointer flex items-center gap-1 w-max">
-                            <ImageIcon size={12} /> Add Image
+                          <label className="text-[9px] font-black uppercase tracking-widest text-primary hover:opacity-70 cursor-pointer flex items-center gap-2 w-max transition-all">
+                            <ImageIcon size={14} /> Attach Visual
                             <input 
                               type="file" 
                               accept="image/*" 
@@ -375,76 +382,80 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                           </label>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <label className="flex items-center gap-1 cursor-pointer">
+                      <div className="flex items-center gap-4 mt-4">
+                        <label className="flex items-center gap-2 cursor-pointer group/radio">
                           <input 
                             type="radio" 
                             name="correct_answer" 
                             checked={editedQuestion.answer === label}
                             onChange={() => handleChange('answer', label)}
-                            className="w-3.5 h-3.5 text-green-500 focus:ring-green-500 border-slate-300"
+                            className="w-5 h-5 text-emerald-500 focus:ring-emerald-500/20 border-slate-200 transition-all"
                           />
-                          <span className="text-[10px] font-medium text-slate-600">Correct</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover/radio:text-emerald-600 transition-colors">Target</span>
                         </label>
-                        <button className="text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                          <Trash2 size={14} />
-                        </button>
                       </div>
                     </div>
                   ))}
-                  <button className="text-xs font-medium text-blue-600 hover:text-blue-700 mt-1 ml-8">
-                    + Add Option
+                  <button className="text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 mt-4 ml-12 transition-all flex items-center gap-2">
+                    <Plus size={14} /> Expand Matrix
                   </button>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+              {/* Solution Editor */}
+              <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
                 <button 
                   onClick={() => setShowExplanation(!showExplanation)}
-                  className="w-full px-3 py-2 bg-slate-50 flex items-center justify-between hover:bg-slate-100 transition-colors"
+                  className="w-full px-8 py-6 bg-slate-50/50 flex items-center justify-between hover:bg-slate-100 transition-all group"
                 >
-                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider">
-                    Solution and Explanation (Optional)
-                  </span>
-                  <ChevronRight size={14} className={`text-slate-400 transition-transform ${showExplanation ? 'rotate-90' : ''}`} />
+                  <span className="text-[10px] font-black text-dark uppercase tracking-[0.3em]">Logic & Explanation Protocol</span>
+                  <ChevronDown size={20} className={`text-slate-400 transition-transform duration-500 ${showExplanation ? 'rotate-180' : ''}`} />
                 </button>
-                {showExplanation && (
-                  <div className="p-3 border-t border-slate-200 space-y-3">
-                    <div>
-                      <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">English Solution</label>
-                      <textarea
-                        value={editedQuestion.solution_eng || ''}
-                        onChange={(e) => handleChange('solution_eng', e.target.value)}
-                        className="w-full p-2 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400 min-h-[80px]"
-                        placeholder="Add English step-by-step solution here..."
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Hindi Solution</label>
-                      <textarea
-                        value={editedQuestion.solution_hin || ''}
-                        onChange={(e) => handleChange('solution_hin', e.target.value)}
-                        className="w-full p-2 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-blue-400 min-h-[80px]"
-                        placeholder="Add Hindi step-by-step solution here..."
-                      />
-                    </div>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {showExplanation && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="p-8 border-t border-slate-100 space-y-8"
+                    >
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Logic Fragment (English)</label>
+                        <textarea
+                          value={editedQuestion.solution_eng || ''}
+                          onChange={(e) => handleChange('solution_eng', e.target.value)}
+                          className="w-full p-6 bg-slate-50/50 border border-slate-100 rounded-[2rem] text-sm font-bold text-dark focus:ring-4 focus:ring-primary/10 outline-none transition-all min-h-[120px] leading-relaxed"
+                          placeholder="Initialize English logic sequence..."
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Logic Fragment (Hindi)</label>
+                        <textarea
+                          value={editedQuestion.solution_hin || ''}
+                          onChange={(e) => handleChange('solution_hin', e.target.value)}
+                          className="w-full p-6 bg-slate-50/50 border border-slate-100 rounded-[2rem] text-sm font-bold text-dark focus:ring-4 focus:ring-primary/10 outline-none transition-all min-h-[120px] leading-relaxed"
+                          placeholder="Initialize Hindi logic sequence..."
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-4 py-2 bg-white border-t border-slate-200 shrink-0">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
-            <ChevronLeft size={14} /> Previous
+        {/* Footer Navigation */}
+        <div className="flex items-center justify-between px-8 py-4 bg-white border-t border-slate-100 shrink-0">
+          <button className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-dark hover:bg-slate-50 rounded-2xl transition-all group">
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Previous Unit
           </button>
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            Question {question.question_number} of 20
+          <div className="px-6 py-2 bg-slate-50 rounded-full border border-slate-100 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+            Intelligence Unit <span className="text-primary">{question.question_number}</span> of 20
           </div>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
-            Next <ChevronRight size={14} />
+          <button className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-dark hover:bg-slate-50 rounded-2xl transition-all group">
+            Next Unit <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>
