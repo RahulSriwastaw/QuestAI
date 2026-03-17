@@ -4,7 +4,7 @@ import {
   X, Sparkles, FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, 
   Maximize, Download, Printer, Save, Image as ImageIcon, Trash2, GripVertical,
   Bold, Italic, Underline, Strikethrough, Superscript, Subscript, List, ListOrdered, Table, Sigma,
-  Loader2, Plus, ArrowLeft, ArrowRight, ChevronDown
+  Loader2, Plus, ArrowLeft, ArrowRight, ChevronDown, Layout, Edit2
 } from 'lucide-react';
 import { Question } from '../types';
 
@@ -22,6 +22,7 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | 'very_hard' | ''>('');
   const [questionType, setQuestionType] = useState<string>('mcq_single');
   const [activeTab, setActiveTab] = useState<'ai' | 'pdf'>('pdf');
+  const [rightTab, setRightTab] = useState<'edit' | 'preview'>('edit');
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -214,9 +215,10 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
                   
                   <div className="flex-1 overflow-auto space-y-6 relative z-10">
-                    <div className="bg-primary/5 text-primary p-6 rounded-[1.5rem] text-xs font-bold leading-relaxed border border-primary/10">
-                      I am monitoring your edits. I can assist with rephrasing, logic verification, or multi-language translation. How shall we proceed?
-                    </div>
+                    <div 
+                      className="bg-primary/5 text-primary p-6 rounded-[1.5rem] text-xs font-bold leading-relaxed border border-primary/10"
+                      dangerouslySetInnerHTML={{ __html: "I am monitoring your edits. I can assist with rephrasing, logic verification, or multi-language translation. How shall we proceed?" }}
+                    />
                   </div>
                   
                   <div className="mt-6 pt-6 border-t border-slate-50 relative z-10">
@@ -244,12 +246,81 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
           </div>
 
           {/* Right Panel: Editor */}
-          <div className="w-1/2 overflow-auto bg-white p-8 custom-scrollbar">
-            <div className="max-w-2xl mx-auto space-y-8">
-              
-              <button className="w-full py-6 border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-black uppercase tracking-[0.2em] text-[10px] hover:border-primary hover:text-primary hover:bg-primary/5 transition-all group">
-                <span className="group-hover:scale-110 inline-block transition-transform">+ Add Passage / Context</span>
+          <div className="w-1/2 overflow-hidden bg-white flex flex-col">
+            <div className="flex items-center px-8 bg-slate-50/50 border-b border-slate-100 shrink-0 gap-8">
+              <button 
+                onClick={() => setRightTab('edit')}
+                className={`flex items-center gap-2 py-4 text-[10px] font-black uppercase tracking-[0.25em] border-b-2 transition-all ${
+                  rightTab === 'edit' ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                <Edit2 size={14} /> Intelligence Editor
               </button>
+              <button 
+                onClick={() => setRightTab('preview')}
+                className={`flex items-center gap-2 py-4 text-[10px] font-black uppercase tracking-[0.25em] border-b-2 transition-all ${
+                  rightTab === 'preview' ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                <Layout size={14} /> Live Preview
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto p-8 custom-scrollbar">
+              <div className="max-w-2xl mx-auto space-y-8">
+                {rightTab === 'preview' ? (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-slate-50/50 rounded-[2.5rem] border border-slate-100 p-10 shadow-xl shadow-slate-200/50">
+                      <div className="flex items-center gap-4 mb-8">
+                        <div className="w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center font-black text-xs shadow-lg shadow-primary/30">
+                          {editedQuestion.question_number}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Preview Mode</span>
+                          <span className="text-[10px] font-black text-primary uppercase tracking-widest">Active Intelligence</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-8">
+                        <div className="text-dark text-lg font-bold leading-relaxed">
+                          <div dangerouslySetInnerHTML={{ __html: editedQuestion.question_text }} />
+                        </div>
+
+                        {editedQuestion.diagram_url && (
+                          <div className="rounded-3xl overflow-hidden border border-slate-100 shadow-lg">
+                            <img src={editedQuestion.diagram_url} alt="Diagram" className="w-full h-auto" />
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 gap-4">
+                          {['A', 'B', 'C', 'D'].map((key) => (
+                            <div 
+                              key={key} 
+                              className={`flex items-center gap-4 p-5 rounded-2xl border transition-all ${
+                                editedQuestion.answer === key 
+                                  ? 'bg-emerald-50/50 border-emerald-200 shadow-sm' 
+                                  : 'bg-white border-slate-100'
+                              }`}
+                            >
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-black ${
+                                editedQuestion.answer === key ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-100 text-slate-400'
+                              }`}>
+                                {key}
+                              </div>
+                              <div className={`text-sm font-semibold ${editedQuestion.answer === key ? 'text-emerald-900' : 'text-slate-600'}`}>
+                                <div dangerouslySetInnerHTML={{ __html: (editedQuestion.options as any)[key] }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <button className="w-full py-6 border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-black uppercase tracking-[0.2em] text-[10px] hover:border-primary hover:text-primary hover:bg-primary/5 transition-all group">
+                      <span className="group-hover:scale-110 inline-block transition-transform">+ Add Passage / Context</span>
+                    </button>
 
               {/* Question Text Editor */}
               <div className="bg-slate-50/50 rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-xl hover:shadow-slate-200/50 transition-all">
@@ -402,6 +473,9 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
                 </div>
               </div>
 
+                  </>
+                )}
+
               {/* Solution Editor */}
               <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
                 <button 
@@ -445,8 +519,9 @@ export const QuestionEditPanel: React.FC<QuestionEditPanelProps> = ({ question, 
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Footer Navigation */}
+      {/* Footer Navigation */}
         <div className="flex items-center justify-between px-8 py-4 bg-white border-t border-slate-100 shrink-0">
           <button className="flex items-center gap-3 px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-dark hover:bg-slate-50 rounded-2xl transition-all group">
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Previous Unit

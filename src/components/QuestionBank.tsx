@@ -138,29 +138,46 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
   );
 
   const renderTableView = () => (
-    <div className="overflow-x-auto bg-white rounded-2xl border border-slate-200">
-      <table className="w-full text-xs text-left">
-        <thead className="text-[10px] text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+    <div className="overflow-x-auto bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40">
+      <table className="w-full text-xs text-left border-collapse">
+        <thead className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] bg-slate-50/50 border-b border-slate-100">
           <tr>
-            <th className="px-4 py-3">ID</th>
-            <th className="px-4 py-3">Question</th>
-            <th className="px-4 py-3">Subject</th>
-            <th className="px-4 py-3">Chapter</th>
-            <th className="px-4 py-3">Exam</th>
-            <th className="px-4 py-3">Year</th>
-            <th className="px-4 py-3">Answer</th>
+            <th className="px-6 py-5">ID</th>
+            <th className="px-6 py-5">Intelligence Fragment</th>
+            <th className="px-6 py-5">Domain</th>
+            <th className="px-6 py-5">Framework</th>
+            <th className="px-6 py-5">Target</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-slate-50">
           {paginatedQuestions.map((q) => (
-            <tr key={q.id} className="hover:bg-slate-50">
-              <td className="px-4 py-3 font-mono text-slate-500">{q.question_number}</td>
-              <td className="px-4 py-3 font-medium text-dark truncate max-w-[200px]">{q.question_text}</td>
-              <td className="px-4 py-3 text-slate-600">{q.subject}</td>
-              <td className="px-4 py-3 text-slate-600">{q.chapter}</td>
-              <td className="px-4 py-3 text-slate-600">{q.exam}</td>
-              <td className="px-4 py-3 text-slate-600">{q.year}</td>
-              <td className="px-4 py-3 font-bold text-primary">{q.answer}</td>
+            <tr key={q.id} className="hover:bg-primary/[0.02] transition-colors group cursor-pointer" onClick={() => setEditingQuestion(q)}>
+              <td className="px-6 py-4 font-black text-slate-400 text-[10px]">{q.question_number}</td>
+              <td className="px-6 py-4">
+                <div className="flex flex-col gap-1 max-w-md">
+                  <div 
+                    className="font-bold text-dark truncate text-[11px]"
+                    dangerouslySetInnerHTML={{ __html: q.question_text.replace(/<[^>]*>/g, ' ').substring(0, 100) + '...' }}
+                  />
+                  <div className="flex items-center gap-2">
+                    <span className="text-[8px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md">MCQ</span>
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Pg {q.page_number}</span>
+                  </div>
+                </div>
+              </td>
+              <td className="px-6 py-4">
+                <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full font-black text-[9px] uppercase tracking-wider">
+                  {q.subject || 'General'}
+                </span>
+              </td>
+              <td className="px-6 py-4">
+                <span className="text-slate-500 font-bold text-[10px]">{q.exam || 'Standard'}</span>
+              </td>
+              <td className="px-6 py-4">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-[10px] border border-emerald-100 shadow-sm">
+                  {q.answer}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -462,6 +479,66 @@ const QuestionBank: React.FC<QuestionBankProps> = ({
           </React.Fragment>
         ))}
       </div>
+
+      {/* Floating Bulk Actions Bar */}
+      <AnimatePresence>
+        {selectedQuestionIds.size > 0 && (
+          <motion.div 
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] bg-dark/90 backdrop-blur-2xl border border-white/10 px-8 py-4 rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.4)] flex items-center gap-8"
+          >
+            <div className="flex items-center gap-4 pr-8 border-r border-white/10">
+              <div className="w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center font-black text-xs shadow-lg shadow-primary/30">
+                {selectedQuestionIds.size}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Selected Units</span>
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Active Intelligence</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => setShowBulkAIEditModal(true)}
+                className="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all group"
+              >
+                <Sparkles size={16} className="group-hover:scale-110 transition-transform" /> AI Refine
+              </button>
+              <button 
+                onClick={() => setShowBulkTagModal(true)}
+                className="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all group"
+              >
+                <Tag size={16} className="group-hover:scale-110 transition-transform" /> Metadata
+              </button>
+              <button 
+                onClick={() => setShowCreateSetModal(true)}
+                className="flex items-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all group"
+              >
+                <Layers size={16} className="group-hover:scale-110 transition-transform" /> Curate Set
+              </button>
+              <div className="w-px h-8 bg-white/10 mx-2" />
+              <button 
+                onClick={() => {
+                  onBulkDelete(Array.from(selectedQuestionIds));
+                  setSelectedQuestionIds(new Set());
+                }}
+                className="flex items-center gap-2 px-5 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all group"
+              >
+                <Trash2 size={16} className="group-hover:scale-110 transition-transform" /> Purge
+              </button>
+            </div>
+
+            <button 
+              onClick={() => setSelectedQuestionIds(new Set())}
+              className="ml-4 p-2 text-slate-400 hover:text-white transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <BulkAIEditModal 
         isOpen={showBulkAIEditModal}
